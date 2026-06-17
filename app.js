@@ -440,3 +440,124 @@ END:VCALENDAR`;
   link.download = "werkstatt-termin.ics";
   link.click();
 }
+let belege = JSON.parse(localStorage.getItem("belege")) || [];
+
+async function pdfLesen(input){
+  const datei = input.files[0];
+  if(!datei) return null;
+
+  return await new Promise(resolve=>{
+    const reader = new FileReader();
+    reader.onload = e => resolve({
+      name: datei.name,
+      daten: e.target.result
+    });
+    reader.readAsDataURL(datei);
+  });
+}
+
+async function belegSpeichern(){
+  const pdf = await pdfLesen(document.getElementById("belegDatei"));
+  if(!pdf){
+    alert("Bitte PDF auswählen.");
+    return;
+  }
+
+  const auftragId = document.getElementById("belegAuftrag").value;
+  const auftrag = auftraege.find(a => String(a.id) === String(auftragId));
+
+  belege.push({
+    id: Date.now(),
+    auftragId,
+    kunde: auftrag ? auftrag.kunde : "",
+    fahrrad: auftrag ? auftrag.fahrrad : "",
+    lieferant: document.getElementById("belegLieferant").value,
+    nummer: document.getElementById("belegNummer").value,
+    betrag: Number(document.getElementById("belegBetrag").value || 0),
+    dateiName: pdf.name,
+    pdf: pdf.daten,
+    datum: new Date().toLocaleDateString()
+  });
+
+  speichernDaten();
+  allesAktualisieren();
+  alert("PDF-Beleg gespeichert.");
+}
+
+function belegAuftraegeFuellen(){
+  const select = document.getElementById("belegAuftrag");
+  if(!select) return;
+
+  select.innerHTML = `<option value="">Kein Auftrag</option>` + auftraege.map(a => `
+    <option value="${a.id}">${a.kunde} - ${a.fahrrad} - ${a.leistung}</option>
+  `).join("");
+}
+
+function belegeAnzeigen(){
+  const liste = document.getElementById("belegListe");
+  if(!liste) return;
+
+  liste.innerHTML = belege.map(b => `
+    <div class="auftrag">
+      <b>${b.lieferant || "Lieferant"}</b><br>
+      Rechnung: ${b.nummer || "-"}<br>
+      Betrag EK: ${Number(b.betrag || 0).toFixed(2)} €<br>
+      Kunde: ${b.kunde || "-"}<br>
+      Fahrrad: ${b.fahrrad || "-"}<br>
+      Datei: ${b.dateiName}<br>
+      <button onclick="belegOeffnen(${b.id})">PDF öffnen</button>
+      <button onclick="belegLoeschen(${b.id})">Löschen</button>
+    </div>
+  `).join("");
+}
+
+function belegOeffnen(id){
+  const b = belege.find(x => x.id === id);
+  if(!b) return;
+  const win = window.open();
+  win.document.write(`<iframe src="${b.pdf}" style="width:100%;height:100vh;border:0"></iframe>`);
+}
+
+function belegLoeschen(id){
+  if(!confirm("Beleg löschen?")) return;
+  belege = belege.filter(b => b.id !== id);
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function kundenAnzeigen(){
+  const liste = document.getElementById("kundenListe");
+  if(!liste) return;
+
+  const kunden = {};
+
+  auftraege.forEach(a=>{
+    if(!kunden[a.kunde]) kunden[a.kunde] = [];
+    kunden[a.kunde].push(a);
+  });
+
+  liste.innerHTML = Object.keys(kunden).map(k=>{
+    const summe = kunden[k].reduce((s,a)=>s+Number(a.preis||0)+Number(a.materialpreis||0),0);
+    return `
+      <div class="auftrag">
+        <h3>${k}</h3>
+        Aufträge: ${kunden[k].length}<br>
+        Umsatz: ${summe.toFixed(2)} €
+      </div>
+    `;
+  }).join("");
+}
+
+const alteSpeichernDaten = speichernDaten;
+speichernDaten = function(){
+  alteSpeichernDaten();
+  localStorage.setItem("belege", JSON.stringify(belege));
+};
+
+const alteAllesAktualisieren = allesAktualisieren;
+allesAktualisieren = function(){
+  alteAllesAktualisieren();
+  belegAuftraegeFuellen();
+  belegeAnzeigen();
+  kundenAnzeigen();
+};
