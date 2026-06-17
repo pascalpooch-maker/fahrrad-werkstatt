@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fahrrad Werkstatt 8B.1</title>
+<title>Fahrrad Werkstatt Pro</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <header>
-<h1>🚲 Fahrrad Werkstatt</h1>
-<p>Aufträge · Bilder · Lager · Bestellungen · Kalender · Rechnungen</p>
+<h1>🚲 Fahrrad Werkstatt Pro</h1>
+<p>Aufträge · Kunden · Fahrräder · Lager · Bestellungen · Kalender · Belege · Rechnungen</p>
 </header>
 
 <div class="container">
@@ -20,10 +20,12 @@
 <button onclick="zeigeTab('dashboard')">Dashboard</button>
 <button onclick="zeigeTab('auftrag')">Auftrag</button>
 <button onclick="zeigeTab('liste')">Aufträge</button>
+<button onclick="zeigeTab('kunden')">Kunden</button>
 <button onclick="zeigeTab('lager')">Lager</button>
 <button onclick="zeigeTab('bestellungen')">Bestellungen</button>
 <button onclick="zeigeTab('kalender')">Kalender</button>
 <button onclick="zeigeTab('belege')">PDF-Belege</button>
+<button onclick="zeigeTab('rechnung')">Rechnung</button>
 <button onclick="zeigeTab('backup')">Backup</button>
 </nav>
 
@@ -43,8 +45,14 @@
 <label>Telefon</label>
 <input id="telefon" type="text">
 
+<label>E-Mail</label>
+<input id="email" type="email">
+
 <label>Fahrrad</label>
 <input id="fahrrad" type="text">
+
+<label>Seriennummer</label>
+<input id="seriennummer" type="text">
 
 <label>Leistung</label>
 <select id="leistung">
@@ -55,10 +63,11 @@
 <option value="Schaltung einstellen|20">Schaltung einstellen – 20 €</option>
 <option value="Kette wechseln|25">Kette wechseln – 25 €</option>
 <option value="Große Inspektion|129">Große Inspektion – 129 €</option>
+<option value="E-Bike Diagnose|35">E-Bike Diagnose – 35 €</option>
 </select>
 
-<label>Zusatzarbeiten</label>
-<textarea id="notiz" placeholder="z.B. Bremsbeläge hinten prüfen"></textarea>
+<label>Zusatzarbeiten / Diagnose</label>
+<textarea id="notiz" placeholder="z.B. Bremsbeläge hinten prüfen, Kette verschlissen"></textarea>
 
 <label>Material / Teile</label>
 <input id="material" placeholder="z.B. Schlauch SV19">
@@ -88,14 +97,34 @@
 <div id="auftragsliste"></div>
 </section>
 
+<section id="kunden" class="tab card">
+<h2>Kundenakte</h2>
+<p>Hier erscheinen Kunden automatisch über gespeicherte Aufträge.</p>
+<div id="kundenListe"></div>
+</section>
+
 <section id="lager" class="tab card">
 <h2>Lager</h2>
 
 <label>Artikel</label>
 <input id="lagerName">
 
+<label>Kategorie</label>
+<select id="lagerKategorie">
+<option>Schlauch</option>
+<option>Reifen</option>
+<option>Kette</option>
+<option>Kassette</option>
+<option>Bremsbelag</option>
+<option>Reinigung</option>
+<option>Sonstiges</option>
+</select>
+
 <label>Bestand</label>
 <input id="lagerBestand" type="number">
+
+<label>Mindestbestand</label>
+<input id="lagerMinimum" type="number" value="2">
 
 <label>EK €</label>
 <input id="lagerEk" type="number" step="0.01">
@@ -113,6 +142,9 @@
 
 <label>Kunde</label>
 <input id="bestellKunde">
+
+<label>Auftrag / Fahrrad</label>
+<input id="bestellAuftrag">
 
 <label>Teil</label>
 <input id="bestellTeil">
@@ -140,11 +172,34 @@
 <input id="terminZeit" type="time">
 
 <label>Kunde / Aufgabe</label>
-<input id="terminText">
+<input id="terminText" placeholder="z.B. Müller - Frühjahrs-Check">
 
 <button onclick="terminSpeichern()">Termin speichern</button>
 
 <div id="terminListe"></div>
+</section>
+
+<section id="belege" class="tab card">
+<h2>PDF-Belege / Einkaufsrechnungen</h2>
+
+<label>Auftrag zuordnen</label>
+<select id="belegAuftrag"></select>
+
+<label>Lieferant</label>
+<input id="belegLieferant" placeholder="z.B. Bike-Discount">
+
+<label>Rechnungsnummer</label>
+<input id="belegNummer">
+
+<label>Gesamtbetrag EK €</label>
+<input id="belegBetrag" type="number" step="0.01">
+
+<label>PDF auswählen</label>
+<input id="belegDatei" type="file" accept="application/pdf">
+
+<button onclick="belegSpeichern()">PDF-Beleg speichern</button>
+
+<div id="belegListe"></div>
 </section>
 
 <section id="rechnung" class="tab card">
