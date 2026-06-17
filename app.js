@@ -492,23 +492,95 @@ function belegeAnzeigen() {
 }
 
 function rechnungErstellen(id) {
-  const a = auftraege.find(x => String(x.id) === String(id));
-  if (!a) return;
 
-  const gesamt =
+  const a = auftraege.find(x => String(x.id) === String(id));
+  if(!a) return;
+
+  const rechnungsnummer = "R-" + a.id;
+
+  const netto =
     Number(a.preis || 0) +
     Number(a.materialpreis || 0);
 
+  const mwst = netto * 0.20;
+  const brutto = netto + mwst;
+
   document.getElementById("rechnungInhalt").innerHTML = `
-    <h2>Rechnung</h2>
-    <p><b>Kunde:</b> ${a.kunde}</p>
-    <p><b>Fahrrad:</b> ${a.fahrrad}</p>
-    <p><b>Leistung:</b> ${a.leistung}</p>
-    <p><b>Material:</b> ${a.material || "-"}</p>
-    <h3>Gesamt: ${gesamt.toFixed(2)} €</h3>
+
+    <div style="padding:20px">
+
+      <h1>🚲 Fahrrad Werkstatt Pro</h1>
+
+      <hr>
+
+      <p><b>Rechnungsnummer:</b> ${rechnungsnummer}</p>
+      <p><b>Datum:</b> ${a.datum}</p>
+
+      <hr>
+
+      <h3>Kunde</h3>
+
+      <p>${a.kunde}</p>
+      <p>${a.telefon || ""}</p>
+      <p>${a.email || ""}</p>
+
+      <hr>
+
+      <h3>Fahrzeug</h3>
+
+      <p><b>Fahrrad:</b> ${a.fahrrad}</p>
+      <p><b>Seriennummer:</b> ${a.seriennummer || "-"}</p>
+
+      <hr>
+
+      <h3>Leistungen</h3>
+
+      <table width="100%">
+        <tr>
+          <th align="left">Position</th>
+          <th align="right">Preis</th>
+        </tr>
+
+        <tr>
+          <td>${a.leistung}</td>
+          <td align="right">
+            ${Number(a.preis || 0).toFixed(2)} €
+          </td>
+        </tr>
+
+        <tr>
+          <td>${a.material || "Material"}</td>
+          <td align="right">
+            ${Number(a.materialpreis || 0).toFixed(2)} €
+          </td>
+        </tr>
+
+      </table>
+
+      <hr>
+
+      <p>Netto: ${netto.toFixed(2)} €</p>
+      <p>MwSt. 20%: ${mwst.toFixed(2)} €</p>
+
+      <h2>Gesamtbetrag: ${brutto.toFixed(2)} €</h2>
+
+      <hr>
+
+      <p>
+      Vielen Dank für Ihren Auftrag.
+      </p>
+
+      <br><br><br>
+
+      _______________________
+      <br>
+      Unterschrift
+
+    </div>
   `;
 
   zeigeTab("rechnung");
+}
 }
 
 function backupExport() {
