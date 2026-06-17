@@ -303,3 +303,140 @@ window.onload = function() {
   zeigeTab("dashboard");
   allesAktualisieren();
 };
+const leistungsTeile = {
+  "Schlauch wechseln": ["Schlauch"],
+  "Reifenwechsel": ["Reifen"],
+  "Kette wechseln": ["Kette"],
+  "Bremsen einstellen": [],
+  "Schaltung einstellen": [],
+  "Frühjahrs-Check": ["Kettenöl"],
+  "Große Inspektion": ["Kettenöl", "Bremsreiniger"]
+};
+
+function lagerTeilFinden(name){
+  return lager.find(t => t.name.toLowerCase().includes(name.toLowerCase()));
+}
+
+function lagerFuerAuftragPruefen(auftrag){
+  const teile = leistungsTeile[auftrag.leistung] || [];
+
+  teile.forEach(teilName => {
+    const teil = lagerTeilFinden(teilName);
+
+    if(teil && teil.bestand > 0){
+      teil.bestand -= 1;
+    } else {
+      bestellungen.push({
+        id: Date.now() + Math.random(),
+        kunde: auftrag.kunde,
+        teil: teilName,
+        status: "Offen",
+        auftrag: auftrag.id
+      });
+    }
+  });
+}
+
+async function auftragSpeichern() {
+  const leistungWert = document.getElementById("leistung").value.split("|");
+  const leistungsName = leistungWert[0];
+  const leistungsPreis = Number(leistungWert[1] || 0);
+  const materialpreis = Number(document.getElementById("materialpreis").value || 0);
+  const editId = document.getElementById("editId").value;
+  const neueBilder = await bilderLesen(document.getElementById("bilder"));
+
+  const daten = {
+    kunde: document.getElementById("kunde").value,
+    telefon: document.getElementById("telefon").value,
+    fahrrad: document.getElementById("fahrrad").value,
+    leistung: leistungsName,
+    preis: leistungsPreis,
+    notiz: document.getElementById("notiz").value,
+    material: document.getElementById("material").value,
+    materialpreis: materialpreis,
+    status: document.getElementById("status").value,
+    datum: new Date().toLocaleDateString(),
+  };
+
+  if (!daten.kunde || !daten.fahrrad) {
+    alert("Bitte Kunde und Fahrrad eintragen.");
+    return;
+  }
+
+  if (editId) {
+    const index = auftraege.findIndex(a => String(a.id) === String(editId));
+    if (index >= 0) {
+      daten.id = auftraege[index].id;
+      daten.bilder = [...(auftraege[index].bilder || []), ...neueBilder];
+      daten.lagerVerarbeitet = auftraege[index].lagerVerarbeitet || false;
+      auftraege[index] = daten;
+    }
+  } else {
+    daten.id = Date.now();
+    daten.bilder = neueBilder;
+    daten.lagerVerarbeitet = true;
+    lagerFuerAuftragPruefen(daten);
+    auftraege.push(daten);
+  }
+
+  speichernDaten();
+  formularLeeren();
+  allesAktualisieren();
+  zeigeTab("liste");
+}
+
+function bestellungenAnzeigen() {
+  document.getElementById("bestellListe").innerHTML = bestellungen.map(b => `
+    <div class="auftrag">
+      <b>${b.kunde}</b><br>
+      Teil: ${b.teil}<br>
+      Auftrag: ${b.auftrag || "-"}<br>
+      Status: ${b.status}<br>
+      <button onclick="bestellStatusAendern(${b.id}, 'Bestellt')">Bestellt</button>
+      <button onclick="bestellStatusAendern(${b.id}, 'Geliefert')">Geliefert</button>
+      <button onclick="bestellStatusAendern(${b.id}, 'Eingebaut')">Eingebaut</button>
+    </div>
+  `).join("");
+}
+
+function bestellStatusAendern(id,status){
+  const b = bestellungen.find(x => String(x.id) === String(id));
+  if(!b) return;
+  b.status = status;
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function termineAnzeigen() {
+  document.getElementById("terminListe").innerHTML = termine.map(t => `
+    <div class="auftrag">
+      <b>${t.datum} ${t.zeit}</b><br>
+      ${t.text}<br>
+      <button onclick="appleKalender(${t.id})">In Apple Kalender</button>
+    </div>
+  `).join("");
+}
+
+function appleKalender(id){
+  const t = termine.find(x => x.id === id);
+  if(!t) return;
+
+  const start = t.datum.replaceAll("-","") + "T" + t.zeit.replace(":","") + "00";
+  const ende = t.datum.replaceAll("-","") + "T" + (Number(t.zeit.split(":")[0])+1).toString().padStart(2,"0") + t.zeit.split(":")[1] + "00";
+
+  const ics = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:Fahrrad Werkstatt - ${t.text}
+DTSTART:${start}
+DTEND:${ende}
+DESCRIPTION:Termin aus Fahrrad Werkstatt App
+END:VEVENT
+END:VCALENDAR`;
+
+  const blob = new Blob([ics], {type:"text/calendar"});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "werkstatt-termin.ics";
+  link.click();
+}
