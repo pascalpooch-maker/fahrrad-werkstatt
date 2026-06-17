@@ -1,40 +1,106 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Werkstatt V2">
-<title>Fahrrad Werkstatt V2</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fahrrad Werkstatt V4</title>
 <style>
-:root{--bg:#f6f7fb;--card:#fff;--text:#111;--muted:#666;--line:#ddd;--accent:#0b7cff;--danger:#c62828;--ok:#2e7d32;--warn:#ef6c00}
-*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0}.wrap{max-width:1050px;margin:auto;padding:14px}header{position:sticky;top:0;background:var(--bg);z-index:5;padding:10px 0;border-bottom:1px solid var(--line)}h1{font-size:24px;margin:0 0 8px}.tabs{display:flex;gap:6px;overflow:auto}.tabs button{width:auto;white-space:nowrap}.tab{display:none}.tab.active{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0;box-shadow:0 1px 3px #0001}input,textarea,select{width:100%;padding:11px;margin:5px 0 10px;border:1px solid #bbb;border-radius:9px;font-size:16px;background:#fff}textarea{min-height:80px}button{border:0;background:var(--accent);color:white;padding:11px 13px;border-radius:10px;font-size:15px;margin:3px;cursor:pointer}.ghost{background:#e9eef8;color:#111}.danger{background:var(--danger)}.ok{background:var(--ok)}.warn{background:var(--warn)}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.pill{display:inline-block;padding:4px 8px;border-radius:99px;background:#eee;font-size:13px}.muted{color:var(--muted);font-size:14px}.price{font-size:22px;font-weight:700}.right{text-align:right}.list{display:grid;gap:8px}.item{border-left:5px solid var(--accent)}.item.fertig{border-left-color:var(--ok)}.item.warten{border-left-color:var(--warn)}.item.bezahlt{border-left-color:#555}.small{font-size:13px}.hide{display:none}@media(max-width:750px){.grid{grid-template-columns:1fr}.wrap{padding:10px}button{width:100%;margin:4px 0}.tabs button{width:auto}}
-@media print{header,.noPrint,button{display:none!important}body{background:#fff}.card{box-shadow:none;border:0}.wrap{max-width:none}}
+:root{--bg:#f6f7f9;--card:#fff;--txt:#111;--muted:#667085;--line:#ddd;--pri:#1f6feb;--ok:#15803d;--warn:#b45309;--bad:#b91c1c}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--txt)}header{position:sticky;top:0;z-index:3;background:#111;color:white;padding:14px 16px}header h1{font-size:20px;margin:0}.wrap{max-width:1100px;margin:auto;padding:14px}.tabs{display:flex;gap:8px;overflow:auto;margin:10px 0 14px}.tabs button{white-space:nowrap;border:0;background:#e5e7eb;border-radius:999px;padding:10px 14px}.tabs button.active{background:var(--pri);color:white}.grid{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:850px){.grid2{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:1fr 1fr 1fr}}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 1px 4px #0001}h2,h3{margin:0 0 10px}label{font-size:13px;color:var(--muted);display:block;margin-top:8px}input,textarea,select{width:100%;border:1px solid #cfd4dc;border-radius:10px;padding:10px;font-size:16px;background:white}textarea{min-height:80px}button{cursor:pointer;border:0;border-radius:10px;padding:10px 12px;font-weight:600;background:#e5e7eb}button.primary{background:var(--pri);color:white}button.ok{background:var(--ok);color:white}button.bad{background:var(--bad);color:white}button.warn{background:var(--warn);color:white}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.small{font-size:13px;color:var(--muted)}.pill{display:inline-block;border-radius:999px;background:#eef2ff;padding:4px 8px;margin:2px;font-size:12px}.list{display:grid;gap:10px}.item{border:1px solid var(--line);border-radius:12px;padding:10px;background:white}.right{text-align:right}.total{font-size:24px;font-weight:800}.hidden{display:none}.service{display:flex;gap:8px;align-items:flex-start;border-bottom:1px solid #eee;padding:8px 0}.service input[type=checkbox]{width:auto;margin-top:4px}.service .grow{flex:1}.service b{display:block}.danger{color:var(--bad)}.success{color:var(--ok)}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #eee;padding:8px;text-align:left}.printOnly{display:none}@media print{header,.tabs,.noPrint,button{display:none!important}.wrap{padding:0}.card{box-shadow:none;border:0}.printOnly{display:block}body{background:white}}
 </style>
 </head>
-<body><div class="wrap">
-<header>
-<h1>🚲 Fahrrad Werkstatt V2</h1>
-<div class="tabs noPrint">
-<button onclick="tab('auftraege')">Aufträge</button><button onclick="tab('neu')">Neuer Auftrag</button><button onclick="tab('kunden')">Kunden</button><button onclick="tab('lager')">Lager</button><button onclick="tab('auswertung')">Auswertung</button><button onclick="tab('daten')">Backup</button>
-</div>
-</header>
-<section id="auftraege" class="tab active"><div class="card"><input id="suche" oninput="render()" placeholder="Suchen: Kunde, Telefon, Fahrrad, Arbeit"><select id="filter" onchange="render()"><option value="">Alle Status</option><option>Neu</option><option>Warten auf Freigabe</option><option>Warten auf Teile</option><option>In Arbeit</option><option>Fertig</option><option>Bezahlt</option></select></div><div id="auftragsListe" class="list"></div></section>
-<section id="neu" class="tab"><div class="card"><h2>Neuer Auftrag</h2><div class="grid"><div><label>Kunde</label><input id="kunde" placeholder="Name"><label>Telefon</label><input id="telefon" placeholder="Telefon"><label>E-Mail</label><input id="email" placeholder="E-Mail"></div><div><label>Fahrrad</label><input id="fahrrad" placeholder="Marke / Modell"><label>Rahmennummer</label><input id="rahmen" placeholder="optional"><label>Status</label><select id="status"><option>Neu</option><option>Warten auf Freigabe</option><option>Warten auf Teile</option><option>In Arbeit</option><option>Fertig</option><option>Bezahlt</option></select></div></div><label>Diagnose / Arbeiten</label><textarea id="arbeit" placeholder="z.B. Kette und Kassette wechseln, Schaltung einstellen"></textarea><div class="grid"><div><label>Teilebeschreibung</label><textarea id="teileText" placeholder="Kette 11-fach, Kassette, Bremsbeläge..."></textarea></div><div><label>Teilekosten Einkauf €</label><input id="teileEk" type="number" step="0.01" placeholder="0"><label>Teile Verkauf €</label><input id="teileVk" type="number" step="0.01" placeholder="0"><label>Arbeitsstunden</label><input id="stunden" type="number" step="0.1" placeholder="0"><label>Stundensatz €</label><input id="satz" type="number" step="0.01" value="45"></div></div><button onclick="speichern()">Auftrag speichern</button></div></section>
-<section id="kunden" class="tab"><div id="kundenListe"></div></section>
-<section id="lager" class="tab"><div class="card"><h2>Lagerteil hinzufügen</h2><div class="grid"><input id="lagerName" placeholder="Teil"><input id="lagerMenge" type="number" placeholder="Menge"><input id="lagerMin" type="number" placeholder="Mindestbestand"><input id="lagerPreis" type="number" step="0.01" placeholder="EK Preis €"></div><button onclick="lagerAdd()">Speichern</button></div><div id="lagerListe"></div></section>
-<section id="auswertung" class="tab"><div id="stats"></div></section>
-<section id="daten" class="tab"><div class="card"><h2>Backup</h2><button onclick="exportData()">Backup exportieren</button><input type="file" id="importFile" accept="application/json" onchange="importData(event)"><button class="danger" onclick="resetAll()">Alles löschen</button><p class="muted">Daten werden nur in diesem Browser auf diesem Gerät gespeichert. Regelmäßig Backup exportieren.</p></div></section>
+<body>
+<header><h1>🚲 Fahrrad Werkstatt V4</h1><div class="small" style="color:#ddd">Private Werkstatt-App · Daten bleiben im Browser</div></header>
+<div class="wrap">
+ <div class="tabs noPrint">
+  <button class="active" onclick="tab('auftraege',this)">Aufträge</button>
+  <button onclick="tab('neu',this)">Neuer Auftrag</button>
+  <button onclick="tab('leistungen',this)">Leistungen</button>
+  <button onclick="tab('lager',this)">Lager</button>
+  <button onclick="tab('kunden',this)">Kunden</button>
+  <button onclick="tab('auswertung',this)">Auswertung</button>
+  <button onclick="tab('backup',this)">Backup</button>
+ </div>
+
+ <section id="auftraege" class="page">
+  <div class="card"><h2>Aufträge</h2><div class="row"><input id="suche" placeholder="Suche Kunde, Fahrrad, Auftrag..." oninput="renderOrders()"><select id="filterStatus" onchange="renderOrders()"><option value="">Alle Status</option><option>Neu</option><option>Warten auf Teile</option><option>In Arbeit</option><option>Fertig</option><option>Bezahlt</option></select></div></div>
+  <div id="orderList" class="list"></div>
+ </section>
+
+ <section id="neu" class="page hidden">
+  <div class="grid grid2">
+   <div class="card"><h2>Neuer Auftrag</h2>
+    <label>Kunde</label><input id="n_kunde" placeholder="Name">
+    <label>Telefon</label><input id="n_tel" placeholder="Telefon">
+    <label>E-Mail</label><input id="n_mail" placeholder="optional">
+    <label>Fahrrad</label><input id="n_bike" placeholder="Marke / Modell / Farbe">
+    <label>Seriennummer</label><input id="n_serial" placeholder="optional">
+    <label>Status</label><select id="n_status"><option>Neu</option><option>Warten auf Teile</option><option>In Arbeit</option><option>Fertig</option><option>Bezahlt</option></select>
+    <label>Notizen / Diagnose</label><textarea id="n_note" placeholder="Was ist zu tun?"></textarea>
+   </div>
+   <div class="card"><h2>Leistungen auswählen</h2><div class="small">Du kannst mehrere Leistungen anklicken. Preise und Texte kannst du unter „Leistungen“ bearbeiten.</div><div id="servicePick"></div>
+    <h3>Material / Teile</h3><div id="partsBox"></div><button onclick="addPartRow()">+ Teil hinzufügen</button>
+    <div class="right"><div class="small">Gesamt</div><div id="newTotal" class="total">0,00 €</div></div>
+    <button class="primary" onclick="saveOrder()">Auftrag speichern</button>
+   </div>
+  </div>
+ </section>
+
+ <section id="leistungen" class="page hidden">
+  <div class="card"><h2>Vorgefertigte Arbeiten</h2><div class="small">Bearbeiten, löschen oder eigene Arbeiten hinzufügen.</div>
+   <div class="grid grid3"><input id="s_name" placeholder="Leistung"><input id="s_price" type="number" step="0.01" placeholder="Preis €"><input id="s_cat" placeholder="Kategorie z.B. Wartung"></div>
+   <label>Beschreibung</label><textarea id="s_desc" placeholder="Was ist enthalten?"></textarea><button class="primary" onclick="addService()">Leistung hinzufügen</button>
+  </div>
+  <div id="serviceList" class="list"></div>
+ </section>
+
+ <section id="lager" class="page hidden">
+  <div class="card"><h2>Lager</h2><div class="grid grid3"><input id="l_name" placeholder="Teil"><input id="l_qty" type="number" placeholder="Bestand"><input id="l_min" type="number" placeholder="Mindestbestand"></div><div class="grid grid2"><input id="l_buy" type="number" step="0.01" placeholder="EK €"><input id="l_sell" type="number" step="0.01" placeholder="VK €"></div><button class="primary" onclick="addStock()">Teil speichern</button></div><div id="stockList" class="list"></div>
+ </section>
+
+ <section id="kunden" class="page hidden"><div class="card"><h2>Kundenhistorie</h2><div id="customerList"></div></div></section>
+ <section id="auswertung" class="page hidden"><div class="card"><h2>Auswertung</h2><div id="stats"></div></div></section>
+ <section id="backup" class="page hidden"><div class="card"><h2>Backup</h2><button onclick="exportData()">Backup exportieren</button><label>Backup importieren</label><input type="file" accept="application/json" onchange="importData(event)"><button class="bad" onclick="resetAll()">Alles löschen</button></div></section>
 </div>
 <script>
-const KEY='fw_v2';let db=load();function load(){return JSON.parse(localStorage.getItem(KEY)||'{"jobs":[],"parts":[],"next":1}')}function save(){localStorage.setItem(KEY,JSON.stringify(db))}function euro(n){return (Number(n)||0).toFixed(2).replace('.',',')+' €'}function esc(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}function tab(id){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');render()}
-function speichern(){let j={id:'A-'+String(db.next++).padStart(4,'0'),date:new Date().toISOString().slice(0,10),kunde:kunde.value,telefon:telefon.value,email:email.value,fahrrad:fahrrad.value,rahmen:rahmen.value,status:status.value,arbeit:arbeit.value,teileText:teileText.value,teileEk:+teileEk.value||0,teileVk:+teileVk.value||0,stunden:+stunden.value||0,satz:+satz.value||45};db.jobs.unshift(j);save();['kunde','telefon','email','fahrrad','rahmen','arbeit','teileText','teileEk','teileVk','stunden'].forEach(id=>document.getElementById(id).value='');satz.value=45;tab('auftraege')}
-function ges(j){return j.teileVk+j.stunden*j.satz}function gew(j){return ges(j)-j.teileEk}
-function render(){let q=(suche?.value||'').toLowerCase(),f=filter?.value||'';let jobs=db.jobs.filter(j=>(!f||j.status==f)&&JSON.stringify(j).toLowerCase().includes(q));auftragsListe.innerHTML=jobs.map((j,i)=>`<div class="card item ${j.status.toLowerCase().split(' ')[0]}"><div class="row"><b>${esc(j.id)} · ${esc(j.kunde)}</b><span class="pill">${esc(j.status)}</span></div><div class="muted">${esc(j.date)} · ${esc(j.telefon)} · ${esc(j.fahrrad)}</div><p>${esc(j.arbeit)}</p><p class="small"><b>Teile:</b> ${esc(j.teileText)}</p><div class="row"><span class="price">${euro(ges(j))}</span><span class="muted">Gewinn ca. ${euro(gew(j))}</span></div><div class="row noPrint"><select onchange="setStatus('${j.id}',this.value)"><option>${j.status}</option><option>Neu</option><option>Warten auf Freigabe</option><option>Warten auf Teile</option><option>In Arbeit</option><option>Fertig</option><option>Bezahlt</option></select><button class="ghost" onclick="rechnung('${j.id}')">Rechnung/Druck</button><button class="danger" onclick="delJob('${j.id}')">Löschen</button></div></div>`).join('')||'<div class="card">Keine Aufträge.</div>';renderKunden();renderLager();renderStats()}
-function setStatus(id,s){let j=db.jobs.find(x=>x.id==id);j.status=s;save();render()}function delJob(id){if(confirm('Auftrag löschen?')){db.jobs=db.jobs.filter(x=>x.id!=id);save();render()}}
-function rechnung(id){let j=db.jobs.find(x=>x.id==id);let w=open('','_blank');w.document.write(`<html><head><title>Rechnung ${j.id}</title><style>body{font-family:Arial;padding:30px}h1{font-size:26px}.right{text-align:right}.box{border:1px solid #ccc;padding:15px;margin:15px 0}</style></head><body><h1>Rechnung / Auftrag ${j.id}</h1><p><b>Kunde:</b> ${esc(j.kunde)}<br>${esc(j.telefon)}<br>${esc(j.email)}</p><div class="box"><b>Fahrrad:</b> ${esc(j.fahrrad)}<br><b>Rahmennummer:</b> ${esc(j.rahmen)}<br><b>Arbeiten:</b><br>${esc(j.arbeit)}<br><br><b>Teile:</b><br>${esc(j.teileText)}</div><p>Teile: ${euro(j.teileVk)}<br>Arbeit: ${euro(j.stunden*j.satz)}<br><b>Gesamt: ${euro(ges(j))}</b></p><script>print()<\/script></body></html>`)}
-function renderKunden(){let map={};db.jobs.forEach(j=>{if(!j.kunde)return;map[j.kunde]=map[j.kunde]||{n:j.kunde,t:j.telefon,e:j.email,c:0,u:0};map[j.kunde].c++;map[j.kunde].u+=ges(j)});kundenListe.innerHTML='<div class="card"><h2>Kunden</h2>'+Object.values(map).map(k=>`<p><b>${esc(k.n)}</b><br>${esc(k.t)} ${esc(k.e)}<br>${k.c} Auftrag/Aufträge · ${euro(k.u)}</p>`).join('')+'</div>'}
-function lagerAdd(){db.parts.push({name:lagerName.value,qty:+lagerMenge.value||0,min:+lagerMin.value||0,price:+lagerPreis.value||0});save();lagerName.value=lagerMenge.value=lagerMin.value=lagerPreis.value='';renderLager()}function renderLager(){lagerListe.innerHTML=db.parts.map((p,i)=>`<div class="card"><b>${esc(p.name)}</b> <span class="pill ${p.qty<=p.min?'warn':''}">Bestand ${p.qty}</span><br><span class="muted">Minimum ${p.min} · EK ${euro(p.price)}</span><div class="row noPrint"><button class="ghost" onclick="pQty(${i},1)">+1</button><button class="ghost" onclick="pQty(${i},-1)">-1</button><button class="danger" onclick="pDel(${i})">Löschen</button></div></div>`).join('')||'<div class="card">Noch keine Lagerteile.</div>'}function pQty(i,d){db.parts[i].qty+=d;save();renderLager()}function pDel(i){db.parts.splice(i,1);save();renderLager()}
-function renderStats(){let u=db.jobs.reduce((s,j)=>s+ges(j),0),g=db.jobs.reduce((s,j)=>s+gew(j),0),off=db.jobs.filter(j=>j.status!='Bezahlt').length;stats.innerHTML=`<div class="grid"><div class="card"><h2>Umsatz</h2><div class="price">${euro(u)}</div></div><div class="card"><h2>Gewinn ca.</h2><div class="price">${euro(g)}</div></div><div class="card"><h2>Offen</h2><div class="price">${off}</div></div><div class="card"><h2>Aufträge</h2><div class="price">${db.jobs.length}</div></div></div>`}
-function exportData(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}));a.download='werkstatt-backup.json';a.click()}function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{db=JSON.parse(r.result);save();render();alert('Backup importiert')};r.readAsText(f)}function resetAll(){if(confirm('Wirklich alles löschen?')){localStorage.removeItem(KEY);db=load();render()}}render();
-</script></body></html>
+const EUR=n=>(Number(n)||0).toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+let db=JSON.parse(localStorage.getItem('fw_v4')||'null')||{
+ seq:1, orders:[], stock:[], services:[
+ {id:1,cat:'Wartung',name:'Frühjahrs-Check',price:55,desc:'Putzen, einstellen, Durchsicht, Reifendruck, Schraubenkontrolle, Bremsen und Schaltung prüfen'},
+ {id:2,cat:'Wartung',name:'Kleine Inspektion',price:79,desc:'Sichtprüfung, Bremsen einstellen, Schaltung einstellen, Kette prüfen, Laufräder prüfen'},
+ {id:3,cat:'Wartung',name:'Große Inspektion',price:129,desc:'Kompletter Service, Lager prüfen, Antrieb prüfen, Laufräder prüfen, Bremsen und Schaltung einstellen'},
+ {id:4,cat:'Reifen',name:'Reifen wechseln',price:20,desc:'Reifen demontieren/montieren, Luftdruck prüfen. Material extra'},
+ {id:5,cat:'Reifen',name:'Schlauch wechseln',price:15,desc:'Schlauch wechseln, Mantel prüfen. Schlauch extra'},
+ {id:6,cat:'Bremsen',name:'Bremsen einstellen',price:15,desc:'Bremszug/Beläge prüfen und Bremse einstellen'},
+ {id:7,cat:'Bremsen',name:'Bremsbeläge wechseln',price:20,desc:'Bremsbeläge wechseln und Bremse einstellen. Material extra'},
+ {id:8,cat:'Schaltung',name:'Schaltung einstellen',price:20,desc:'Schaltwerk/Umwerfer einstellen, Probeschalten'},
+ {id:9,cat:'Antrieb',name:'Kette wechseln',price:25,desc:'Kette wechseln und Länge anpassen. Kette extra'},
+ {id:10,cat:'Antrieb',name:'Kassette wechseln',price:25,desc:'Kassette wechseln. Material extra'},
+ {id:11,cat:'Laufrad',name:'Laufrad zentrieren',price:25,desc:'Seitenschlag korrigieren, Speichenspannung prüfen'},
+ {id:12,cat:'Montage',name:'Pedale montieren',price:10,desc:'Pedale montieren/fetten'},
+ {id:13,cat:'E-Bike',name:'E-Bike Antriebs-Check',price:35,desc:'Akku, Kontakte, Motorbereich und Sensoren prüfen'}
+ ]};
+function save(){localStorage.setItem('fw_v4',JSON.stringify(db));}
+function tab(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));btn&&btn.classList.add('active');renderAll();}
+function renderServicePick(){let by={};db.services.forEach(s=>(by[s.cat]=by[s.cat]||[]).push(s));let html='';Object.keys(by).forEach(cat=>{html+=`<h3>${cat}</h3>`;by[cat].forEach(s=>html+=`<label class="service"><input type="checkbox" class="svc" value="${s.id}" onchange="calcNew()"><div class="grow"><b>${s.name} · ${EUR(s.price)}</b><span class="small">${s.desc||''}</span></div></label>`)});servicePick.innerHTML=html;calcNew();}
+function addPartRow(p={name:'',buy:0,sell:0,qty:1}){let d=document.createElement('div');d.className='row part';d.innerHTML=`<input placeholder="Teil" value="${p.name}"><input type="number" step="0.01" placeholder="EK" value="${p.buy}"><input type="number" step="0.01" placeholder="VK" value="${p.sell}"><input type="number" placeholder="Menge" value="${p.qty}"><button onclick="this.parentElement.remove();calcNew()">X</button>`;partsBox.appendChild(d);d.querySelectorAll('input').forEach(i=>i.oninput=calcNew);calcNew();}
+function getSelectedServices(){return [...document.querySelectorAll('.svc:checked')].map(c=>db.services.find(s=>s.id==c.value)).filter(Boolean)}
+function getParts(){return [...document.querySelectorAll('.part')].map(r=>{let i=r.querySelectorAll('input');return{name:i[0].value,buy:+i[1].value||0,sell:+i[2].value||0,qty:+i[3].value||1}}).filter(p=>p.name||p.sell||p.buy)}
+function calcNew(){let total=getSelectedServices().reduce((a,s)=>a+(+s.price||0),0)+getParts().reduce((a,p)=>a+(p.sell*p.qty),0);newTotal.textContent=EUR(total)}
+function saveOrder(){let services=getSelectedServices(), parts=getParts();let total=services.reduce((a,s)=>a+s.price,0)+parts.reduce((a,p)=>a+p.sell*p.qty,0);let cost=parts.reduce((a,p)=>a+p.buy*p.qty,0);db.orders.unshift({id:'FW-'+String(db.seq++).padStart(4,'0'),date:new Date().toISOString(),customer:n_kunde.value,tel:n_tel.value,mail:n_mail.value,bike:n_bike.value,serial:n_serial.value,status:n_status.value,note:n_note.value,services,parts,total,cost});save();['n_kunde','n_tel','n_mail','n_bike','n_serial','n_note'].forEach(id=>document.getElementById(id).value='');document.querySelectorAll('.svc').forEach(c=>c.checked=false);partsBox.innerHTML='';calcNew();renderAll();tab('auftraege',document.querySelector('.tabs button'));}
+function renderOrders(){let q=(suche.value||'').toLowerCase(), fs=filterStatus.value;let list=db.orders.filter(o=>(!fs||o.status==fs)&&JSON.stringify(o).toLowerCase().includes(q));orderList.innerHTML=list.map((o,idx)=>`<div class="card"><div class="row"><div><h3>${o.id} · ${o.customer||'Ohne Name'}</h3><div class="small">${new Date(o.date).toLocaleDateString('de-DE')} · ${o.bike||''} · <span class="pill">${o.status}</span></div></div><div class="right total">${EUR(o.total)}</div></div><p>${o.note||''}</p><div>${o.services.map(s=>`<span class="pill">${s.name} ${EUR(s.price)}</span>`).join('')}</div><div>${o.parts.map(p=>`<span class="pill">${p.qty}× ${p.name} ${EUR(p.sell*p.qty)}</span>`).join('')}</div><div class="row noPrint"><select onchange="db.orders[${db.orders.indexOf(o)}].status=this.value;save();renderAll()"><option ${o.status=='Neu'?'selected':''}>Neu</option><option ${o.status=='Warten auf Teile'?'selected':''}>Warten auf Teile</option><option ${o.status=='In Arbeit'?'selected':''}>In Arbeit</option><option ${o.status=='Fertig'?'selected':''}>Fertig</option><option ${o.status=='Bezahlt'?'selected':''}>Bezahlt</option></select><button onclick="printOrder('${o.id}')">Rechnung/Druck</button><button class="bad" onclick="delOrder('${o.id}')">Löschen</button></div></div>`).join('')||'<div class="card">Keine Aufträge gefunden.</div>'}
+function printOrder(id){let o=db.orders.find(x=>x.id==id);let w=open('','_blank');w.document.write(`<html><head><title>${o.id}</title><style>body{font-family:Arial;padding:30px}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;padding:8px;text-align:left}.r{text-align:right}</style></head><body><h1>Rechnung / Auftrag ${o.id}</h1><p><b>Kunde:</b> ${o.customer}<br><b>Fahrrad:</b> ${o.bike}<br><b>Datum:</b> ${new Date(o.date).toLocaleDateString('de-DE')}</p><table><tr><th>Position</th><th class="r">Preis</th></tr>${o.services.map(s=>`<tr><td>${s.name}<br><small>${s.desc||''}</small></td><td class="r">${EUR(s.price)}</td></tr>`).join('')}${o.parts.map(p=>`<tr><td>${p.qty}× ${p.name}</td><td class="r">${EUR(p.sell*p.qty)}</td></tr>`).join('')}<tr><th>Gesamt</th><th class="r">${EUR(o.total)}</th></tr></table><p>${o.note||''}</p></body></html>`);w.document.close();w.print();}
+function delOrder(id){if(confirm('Auftrag löschen?')){db.orders=db.orders.filter(o=>o.id!=id);save();renderAll();}}
+function addService(){db.services.push({id:Date.now(),cat:s_cat.value||'Sonstiges',name:s_name.value,price:+s_price.value||0,desc:s_desc.value});save();s_name.value=s_price.value=s_desc.value='';renderAll();}
+function renderServices(){serviceList.innerHTML=db.services.map(s=>`<div class="item"><div class="row"><input value="${s.name}" onchange="s.name=this.value;save();renderAll()"><input type="number" value="${s.price}" onchange="s.price=+this.value;save();renderAll()"><input value="${s.cat}" onchange="s.cat=this.value;save();renderAll()"><button class="bad" onclick="db.services=db.services.filter(x=>x.id!=${s.id});save();renderAll()">Löschen</button></div><textarea onchange="s.desc=this.value;save();renderAll()">${s.desc||''}</textarea></div>`).join('')}
+function addStock(){db.stock.push({id:Date.now(),name:l_name.value,qty:+l_qty.value||0,min:+l_min.value||0,buy:+l_buy.value||0,sell:+l_sell.value||0});save();l_name.value=l_qty.value=l_min.value=l_buy.value=l_sell.value='';renderAll();}
+function renderStock(){stockList.innerHTML=db.stock.map(x=>`<div class="item"><b>${x.name}</b> <span class="${x.qty<=x.min?'danger':'success'}">Bestand ${x.qty} / Min ${x.min}</span><br><span class="small">EK ${EUR(x.buy)} · VK ${EUR(x.sell)}</span><div class="row"><button onclick="x.qty--;save();renderAll()">-</button><button onclick="x.qty++;save();renderAll()">+</button><button class="bad" onclick="db.stock=db.stock.filter(s=>s.id!=${x.id});save();renderAll()">Löschen</button></div></div>`).join('')||'<div class="card">Noch kein Lager angelegt.</div>'}
+function renderCustomers(){let m={};db.orders.forEach(o=>{m[o.customer]=m[o.customer]||[];m[o.customer].push(o)});customerList.innerHTML=Object.keys(m).filter(Boolean).map(k=>`<h3>${k}</h3><table>${m[k].map(o=>`<tr><td>${o.id}</td><td>${o.bike}</td><td>${o.status}</td><td>${EUR(o.total)}</td></tr>`).join('')}</table>`).join('')||'Keine Kunden.'}
+function renderStats(){let paid=db.orders.filter(o=>o.status=='Bezahlt'), revenue=paid.reduce((a,o)=>a+o.total,0), cost=paid.reduce((a,o)=>a+o.cost,0);stats.innerHTML=`<div class="grid grid3"><div class="card"><b>Bezahlte Aufträge</b><div class="total">${paid.length}</div></div><div class="card"><b>Umsatz</b><div class="total">${EUR(revenue)}</div></div><div class="card"><b>Gewinn grob</b><div class="total">${EUR(revenue-cost)}</div></div></div>`}
+function exportData(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}));a.download='werkstatt-backup.json';a.click();}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{db=JSON.parse(r.result);save();renderAll();alert('Backup importiert')};r.readAsText(f)}
+function resetAll(){if(confirm('Wirklich alles löschen?')){localStorage.removeItem('fw_v4');location.reload()}}
+function renderAll(){renderServicePick();renderOrders();renderServices();renderStock();renderCustomers();renderStats();}
+addPartRow();renderAll();
+</script>
+</body>
+</html>
