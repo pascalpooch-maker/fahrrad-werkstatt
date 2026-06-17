@@ -725,3 +725,46 @@ window.addEventListener("load", function(){
   leistungsCheckboxenAktualisieren();
   leistungenAnzeigen();
 });
+let lagerKategorien = JSON.parse(localStorage.getItem("lagerKategorien")) || [
+  "Schlauch",
+  "Reifen",
+  "Kette",
+  "Kassette",
+  "Bremsbelag",
+  "Reinigung",
+  "E-Bike",
+  "Werkzeug",
+  "Sonstiges"
+];
+
+function kategorieSpeichern(){
+  const name = document.getElementById("neueKategorie").value.trim();
+
+  if(!name){
+    alert("Bitte Kategorie eintragen.");
+    return;
+  }
+
+  if(lagerKategorien.includes(name)){
+    alert("Kategorie gibt es schon.");
+    return;
+  }
+
+  lagerKategorien.push(name);
+  localStorage.setItem("lagerKategorien", JSON.stringify(lagerKategorien));
+
+  document.getElementById("neueKategorie").value = "";
+
+  kategorienAnzeigen();
+}
+
+function kategorienAnzeigen(){
+  const select = document.getElementById("lagerKategorie");
+  if(!select) return;
+
+  select.innerHTML = lagerKategorien.map(k =>
+    `<option>${k}</option>`
+  ).join("");
+}
+
+window.addEventListener("load", kategorienAnzeigen);
