@@ -733,4 +733,83 @@ function artikelInsLagerUebernehmen(){
   speichernDaten();
   allesAktualisieren();
   alert("Artikel wurden ins Lager übernommen.");
+
+let wareneingaenge = JSON.parse(localStorage.getItem("wareneingaenge")) || [];
+
+function wareneingangArtikelSpeichern(){
+  const name = document.getElementById("weArtikel").value;
+  const menge = Number(document.getElementById("weMenge").value || 1);
+  const ek = Number(document.getElementById("weEk").value || 0);
+  const aufschlag = Number(document.getElementById("weAufschlag").value || 0);
+  const vk = ek + (ek * aufschlag / 100);
+
+  if(!name){
+    alert("Bitte Artikel eintragen.");
+    return;
+  }
+
+  const teil = lager.find(t => t.name.toLowerCase() === name.toLowerCase());
+
+  if(teil){
+    teil.bestand = Number(teil.bestand || 0) + menge;
+    teil.ek = ek;
+    teil.vk = vk;
+    teil.aufschlag = aufschlag;
+  } else {
+    lager.push({
+      id: Date.now(),
+      name,
+      bestand: menge,
+      ek,
+      vk,
+      aufschlag
+    });
+  }
+
+  wareneingaenge.push({
+    id: Date.now() + Math.random(),
+    lieferant: document.getElementById("weLieferant").value,
+    nummer: document.getElementById("weNummer").value,
+    artikel: name,
+    menge,
+    ek,
+    vk,
+    datum: new Date().toLocaleDateString()
+  });
+
+  speichernDaten();
+  allesAktualisieren();
+
+  document.getElementById("weArtikel").value = "";
+  document.getElementById("weMenge").value = 1;
+  document.getElementById("weEk").value = "";
 }
+
+function wareneingangAnzeigen(){
+  const liste = document.getElementById("wareneingangListe");
+  if(!liste) return;
+
+  liste.innerHTML = wareneingaenge.map(w => `
+    <div class="auftrag">
+      <b>${w.artikel}</b><br>
+      Lieferant: ${w.lieferant || "-"}<br>
+      Rechnung: ${w.nummer || "-"}<br>
+      Menge: ${w.menge}<br>
+      EK: ${Number(w.ek).toFixed(2)} €<br>
+      VK: ${Number(w.vk).toFixed(2)} €<br>
+      Datum: ${w.datum}
+    </div>
+  `).join("");
+}
+
+const alteSpeichernDatenWE = speichernDaten;
+speichernDaten = function(){
+  alteSpeichernDatenWE();
+  localStorage.setItem("wareneingaenge", JSON.stringify(wareneingaenge));
+};
+
+const alteAllesAktualisierenWE = allesAktualisieren;
+allesAktualisieren = function(){
+  alteAllesAktualisierenWE();
+  wareneingangAnzeigen();
+};
