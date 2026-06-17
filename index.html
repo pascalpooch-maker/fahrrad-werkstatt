@@ -212,25 +212,37 @@
 
 <section id="wareneingang" class="tab card">
 
-<h2>📦 Intelligenter Wareneingang</h2>
+<section id="wareneingang" class="tab card">
+<h2>📦 Wareneingang / Einkaufsrechnung</h2>
 
-<label>PDF-Einkaufsrechnung hochladen</label>
-<input id="wareneingangPdf" type="file" accept="application/pdf">
+<label>Lieferant</label>
+<input id="weLieferant" placeholder="z.B. Bike-Discount">
 
-<button onclick="pdfRechnungLesen()">
-PDF auslesen
-</button>
+<label>Rechnungsnummer</label>
+<input id="weNummer">
 
-<h3>Erkannte Daten</h3>
-<div id="pdfErgebnis"></div>
+<label>PDF-Rechnung ablegen</label>
+<input id="wePdf" type="file" accept="application/pdf">
 
-<h3>Erkannte Artikel</h3>
-<div id="pdfArtikelListe"></div>
+<hr>
 
-<button onclick="artikelInsLagerUebernehmen()">
-Artikel ins Lager übernehmen
-</button>
+<label>Artikel</label>
+<input id="weArtikel" placeholder="z.B. Schlauch SV19">
 
+<label>Menge</label>
+<input id="weMenge" type="number" value="1">
+
+<label>EK pro Stück €</label>
+<input id="weEk" type="number" step="0.01">
+
+<label>Aufschlag %</label>
+<input id="weAufschlag" type="number" value="50">
+
+<button onclick="wareneingangArtikelSpeichern()">Artikel ins Lager buchen</button>
+
+<div id="wareneingangListe"></div>
+</section>
+  
 </section>
 <section id="backup" class="tab card">
 <h2>Backup</h2>
