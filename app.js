@@ -561,3 +561,176 @@ allesAktualisieren = function(){
   belegeAnzeigen();
   kundenAnzeigen();
 };
+let erkannteArtikel = [];
+
+async function pdfRechnungLesen(){
+  const input = document.getElementById("wareneingangPdf");
+  const datei = input.files[0];
+
+  if(!datei){
+    alert("Bitte PDF auswählen.");
+    return;
+  }
+
+  const buffer = await datei.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data: buffer}).promise;
+
+  let text = "";
+
+  for(let i = 1; i <= pdf.numPages; i++){
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(item => item.str).join(" ") + "\n";
+  }
+
+  pdfDatenAuswerten(text);
+}
+
+function pdfDatenAuswerten(text){
+  const lieferant = erkenneLieferant(text);
+  const nummer = erkenneRechnungsnummer(text);
+  const betrag = erkenneBetrag(text);
+
+  erkannteArtikel = erkenneArtikel(text);
+
+  document.getElementById("pdfErgebnis").innerHTML = `
+    <p><b>Lieferant:</b> ${lieferant}</p>
+    <p><b>Rechnungsnummer:</b> ${nummer}</p>
+    <p><b>Gesamtbetrag:</b> ${betrag}</p>
+  `;
+
+  document.getElementById("pdfArtikelListe").innerHTML = erkannteArtikel.map((a,i)=>`
+    <div class="auftrag">
+      <b>${a.name}</b><br>
+      Menge: ${a.menge}<br>
+      EK: ${a.ek.toFixed(2)} €<br>
+      VK Vorschlag: ${a.vk.toFixed(2)} €
+    </div>
+  `).join("");
+}
+
+function erkenneLieferant(text){
+  const t = text.toLowerCase();
+
+  if(t.includes("bike-discount")) return "Bike-Discount";
+  if(t.includes("bike discount")) return "Bike-Discount";
+  if(t.includes("hartje")) return "Hartje";
+  if(t.includes("paul lange")) return "Paul Lange";
+  if(t.includes("messingschlager")) return "Messingschlager";
+  if(t.includes("shimano")) return "Shimano";
+  if(t.includes("rose")) return "Rose Bikes";
+  if(t.includes("bike-components")) return "Bike-Components";
+
+  return "Unbekannt";
+}
+
+function erkenneRechnungsnummer(text){
+  const muster = [
+    /Rechnung\s*Nr\.?\s*[:\-]?\s*([A-Z0-9\-\/]+)/i,
+    /Rechnungsnummer\s*[:\-]?\s*([A-Z0-9\-\/]+)/i,
+    /Invoice\s*No\.?\s*[:\-]?\s*([A-Z0-9\-\/]+)/i
+  ];
+
+  for(const r of muster){
+    const m = text.match(r);
+    if(m) return m[1];
+  }
+
+  return "-";
+}
+
+function erkenneBetrag(text){
+  const muster = [
+    /Gesamtbetrag\s*[:\-]?\s*([0-9]+,[0-9]{2})/i,
+    /Rechnungsbetrag\s*[:\-]?\s*([0-9]+,[0-9]{2})/i,
+    /Total\s*[:\-]?\s*([0-9]+,[0-9]{2})/i
+  ];
+
+  for(const r of muster){
+    const m = text.match(r);
+    if(m) return m[1] + " €";
+  }
+
+  return "-";
+}
+
+function erkenneArtikel(text){
+  const artikel = [];
+  const zeilen = text.split(/\n|  /);
+
+  zeilen.forEach(z=>{
+    const zeile = z.trim();
+
+    if(zeile.length < 8) return;
+
+    const istTeil =
+      zeile.toLowerCase().includes("schlauch") ||
+      zeile.toLowerCase().includes("reifen") ||
+      zeile.toLowerCase().includes("kette") ||
+      zeile.toLowerCase().includes("kassette") ||
+      zeile.toLowerCase().includes("brems") ||
+      zeile.toLowerCase().includes("belag") ||
+      zeile.toLowerCase().includes("zug");
+
+    if(!istTeil) return;
+
+    let menge = 1;
+    const mengenMatch = zeile.match(/(\d+)\s*(x|stk|stück)/i);
+    if(mengenMatch) menge = Number(mengenMatch[1]);
+
+    let ek = 0;
+    const preisMatch = zeile.match(/([0-9]+,[0-9]{2})/);
+    if(preisMatch) ek = Number(preisMatch[1].replace(",", "."));
+
+    const aufschlag = 50;
+    const vk = ek + (ek * aufschlag / 100);
+
+    artikel.push({
+      name: zeile.substring(0,80),
+      menge,
+      ek,
+      vk,
+      aufschlag
+    });
+  });
+
+  return artikel;
+}
+
+function artikelInsLagerUebernehmen(){
+  if(!erkannteArtikel.length){
+    alert("Keine Artikel erkannt.");
+    return;
+  }
+
+  erkannteArtikel.forEach(a=>{
+    const vorhandenesTeil = lager.find(t =>
+      t.name.toLowerCase().includes(a.name.toLowerCase().slice(0,10))
+    );
+
+    if(vorhandenesTeil){
+      vorhandenesTeil.bestand = Number(vorhandenesTeil.bestand || 0) + Number(a.menge || 1);
+      vorhandenesTeil.ek = a.ek;
+      vorhandenesTeil.vk = a.vk;
+    } else {
+      lager.push({
+        id: Date.now() + Math.random(),
+        name: a.name,
+        bestand: a.menge,
+        ek: a.ek,
+        vk: a.vk,
+        aufschlag: a.aufschlag
+      });
+    }
+
+    bestellungen.forEach(b=>{
+      if(a.name.toLowerCase().includes(b.teil.toLowerCase()) && b.status !== "Eingebaut"){
+        b.status = "Geliefert";
+      }
+    });
+  });
+
+  speichernDaten();
+  allesAktualisieren();
+  alert("Artikel wurden ins Lager übernommen.");
+}
