@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fahrrad Werkstatt Pro</title>
+<title>Fahrrad Werkstatt Pro V9</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <header>
-<h1>🚲 Fahrrad Werkstatt Pro</h1>
-<p>Aufträge · Kunden · Fahrräder · Lager · Bestellungen · Kalender · Belege · Rechnungen</p>
+<h1>🚲 Fahrrad Werkstatt Pro V9</h1>
+<p>Werkstatt · Lager · Kunden · Rechnungen · Bestellungen</p>
 </header>
 
 <div class="container">
@@ -22,20 +22,21 @@
 <button onclick="zeigeTab('liste')">Aufträge</button>
 <button onclick="zeigeTab('kunden')">Kunden</button>
 <button onclick="zeigeTab('lager')">Lager</button>
+<button onclick="zeigeTab('wareneingang')">Wareneingang</button>
 <button onclick="zeigeTab('bestellungen')">Bestellungen</button>
 <button onclick="zeigeTab('kalender')">Kalender</button>
-<button onclick="zeigeTab('belege')">PDF-Belege</button>
+<button onclick="zeigeTab('belege')">Belege</button>
 <button onclick="zeigeTab('rechnung')">Rechnung</button>
 <button onclick="zeigeTab('backup')">Backup</button>
-<button onclick="zeigeTab('wareneingang')">Wareneingang</button>
 </nav>
 
 <section id="dashboard" class="tab card">
-<h2>Dashboard</h2>
+<h2>📊 Dashboard</h2>
 <div id="dashboardInhalt"></div>
 </section>
 
 <section id="auftrag" class="tab card">
+
 <h2 id="formularTitel">Neuer Auftrag</h2>
 
 <input type="hidden" id="editId">
@@ -67,11 +68,11 @@
 <option value="E-Bike Diagnose|35">E-Bike Diagnose – 35 €</option>
 </select>
 
-<label>Zusatzarbeiten / Diagnose</label>
-<textarea id="notiz" placeholder="z.B. Bremsbeläge hinten prüfen, Kette verschlissen"></textarea>
+<label>Zusatzarbeiten</label>
+<textarea id="notiz"></textarea>
 
 <label>Material / Teile</label>
-<input id="material" placeholder="z.B. Schlauch SV19">
+<input id="material">
 
 <label>Materialpreis VK €</label>
 <input id="materialpreis" type="number" step="0.01">
@@ -85,27 +86,34 @@
 <option>Bezahlt</option>
 </select>
 
-<label>Bilder zum Auftrag</label>
+<label>Bilder</label>
 <input id="bilder" type="file" accept="image/*" multiple>
 
 <button onclick="auftragSpeichern()">Auftrag speichern</button>
-<button onclick="formularLeeren()">Neuer leerer Auftrag</button>
+<button onclick="formularLeeren()">Neuer Auftrag</button>
+
 </section>
 
 <section id="liste" class="tab card">
-<h2>Aufträge</h2>
-<input id="suche" placeholder="Suche nach Kunde, Fahrrad, Status..." oninput="auftraegeAnzeigen()">
+<h2>📋 Aufträge</h2>
+
+<input id="suche"
+placeholder="Suche nach Kunde, Fahrrad oder Status..."
+oninput="auftraegeAnzeigen()">
+
 <div id="auftragsliste"></div>
 </section>
 
 <section id="kunden" class="tab card">
-<h2>Kundenakte</h2>
-<p>Hier erscheinen Kunden automatisch über gespeicherte Aufträge.</p>
+<h2>👤 Kundenakte</h2>
+
+<p>Alle Kunden mit Auftrags- und Umsatzhistorie.</p>
+
 <div id="kundenListe"></div>
 </section>
 
 <section id="lager" class="tab card">
-<h2>Lager</h2>
+<h2>📦 Lager</h2>
 
 <label>Artikel</label>
 <input id="lagerName">
@@ -133,13 +141,50 @@
 <label>Aufschlag %</label>
 <input id="lagerAufschlag" type="number" value="50">
 
-<button onclick="lagerSpeichern()">Teil ins Lager speichern</button>
+<button onclick="lagerSpeichern()">
+Artikel speichern
+</button>
 
 <div id="lagerListe"></div>
 </section>
 
+<section id="wareneingang" class="tab card">
+
+<h2>📦 Wareneingang</h2>
+
+<label>Lieferant</label>
+<input id="weLieferant">
+
+<label>Rechnungsnummer</label>
+<input id="weNummer">
+
+<label>PDF-Rechnung</label>
+<input id="wePdf" type="file" accept="application/pdf">
+
+<hr>
+
+<label>Artikel</label>
+<input id="weArtikel">
+
+<label>Menge</label>
+<input id="weMenge" type="number" value="1">
+
+<label>EK pro Stück €</label>
+<input id="weEk" type="number" step="0.01">
+
+<label>Aufschlag %</label>
+<input id="weAufschlag" type="number" value="50">
+
+<button onclick="wareneingangArtikelSpeichern()">
+Ins Lager buchen
+</button>
+
+<div id="wareneingangListe"></div>
+
+</section>
+
 <section id="bestellungen" class="tab card">
-<h2>Bestellungen</h2>
+<h2>📦 Bestellungen</h2>
 
 <label>Kunde</label>
 <input id="bestellKunde">
@@ -158,13 +203,15 @@
 <option>Eingebaut</option>
 </select>
 
-<button onclick="bestellungSpeichern()">Bestellung speichern</button>
+<button onclick="bestellungSpeichern()">
+Bestellung speichern
+</button>
 
 <div id="bestellListe"></div>
 </section>
 
 <section id="kalender" class="tab card">
-<h2>Kalender</h2>
+<h2>📅 Kalender</h2>
 
 <label>Datum</label>
 <input id="terminDatum" type="date">
@@ -173,21 +220,23 @@
 <input id="terminZeit" type="time">
 
 <label>Kunde / Aufgabe</label>
-<input id="terminText" placeholder="z.B. Müller - Frühjahrs-Check">
+<input id="terminText">
 
-<button onclick="terminSpeichern()">Termin speichern</button>
+<button onclick="terminSpeichern()">
+Termin speichern
+</button>
 
 <div id="terminListe"></div>
 </section>
 
 <section id="belege" class="tab card">
-<h2>PDF-Belege / Einkaufsrechnungen</h2>
+<h2>📄 PDF-Belege</h2>
 
 <label>Auftrag zuordnen</label>
 <select id="belegAuftrag"></select>
 
 <label>Lieferant</label>
-<input id="belegLieferant" placeholder="z.B. Bike-Discount">
+<input id="belegLieferant">
 
 <label>Rechnungsnummer</label>
 <input id="belegNummer">
@@ -198,67 +247,45 @@
 <label>PDF auswählen</label>
 <input id="belegDatei" type="file" accept="application/pdf">
 
-<button onclick="belegSpeichern()">PDF-Beleg speichern</button>
+<button onclick="belegSpeichern()">
+PDF-Beleg speichern
+</button>
 
 <div id="belegListe"></div>
 </section>
 
 <section id="rechnung" class="tab card">
-<h2>Rechnung</h2>
+<h2>🧾 Rechnung</h2>
+
 <div id="rechnungInhalt"></div>
-<button onclick="zeigeTab('liste')">Zurück</button>
-<button onclick="window.print()">Drucken / PDF speichern</button>
+
+<button onclick="zeigeTab('liste')">
+Zurück
+</button>
+
+<button onclick="window.print()">
+Drucken / PDF speichern
+</button>
 </section>
 
-<section id="wareneingang" class="tab card">
-
-<section id="wareneingang" class="tab card">
-<h2>📦 Wareneingang / Einkaufsrechnung</h2>
-
-<label>Lieferant</label>
-<input id="weLieferant" placeholder="z.B. Bike-Discount">
-
-<label>Rechnungsnummer</label>
-<input id="weNummer">
-
-<label>PDF-Rechnung ablegen</label>
-<input id="wePdf" type="file" accept="application/pdf">
-
-<hr>
-
-<label>Artikel</label>
-<input id="weArtikel" placeholder="z.B. Schlauch SV19">
-
-<label>Menge</label>
-<input id="weMenge" type="number" value="1">
-
-<label>EK pro Stück €</label>
-<input id="weEk" type="number" step="0.01">
-
-<label>Aufschlag %</label>
-<input id="weAufschlag" type="number" value="50">
-
-<button onclick="wareneingangArtikelSpeichern()">Artikel ins Lager buchen</button>
-
-<div id="wareneingangListe"></div>
-</section>
-  
-</section>
 <section id="backup" class="tab card">
-<h2>Backup</h2>
-<button onclick="backupExport()">Backup exportieren</button>
-<textarea id="backupText" placeholder="Backup hier einfügen"></textarea>
-<button onclick="backupImport()">Backup importieren</button>
+<h2>💾 Backup</h2>
+
+<button onclick="backupExport()">
+Backup exportieren
+</button>
+
+<textarea id="backupText"
+placeholder="Backup hier einfügen"></textarea>
+
+<button onclick="backupImport()">
+Backup importieren
+</button>
 </section>
 
 </div>
 
 <script src="app.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-</script>
 
 </body>
 </html>
