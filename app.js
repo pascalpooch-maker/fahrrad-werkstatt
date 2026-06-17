@@ -560,3 +560,24 @@ window.onload = function() {
   zeigeTab("dashboard");
   allesAktualisieren();
 };
+function terminLoeschen(id) {
+  if (!confirm("Termin wirklich löschen?")) return;
+
+  termine = termine.filter(t => String(t.id) !== String(id));
+
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function termineAnzeigen() {
+  const liste = document.getElementById("terminListe");
+  if (!liste) return;
+
+  liste.innerHTML = termine.map(t => `
+    <div class="auftrag">
+      <b>${t.datum} ${t.zeit}</b><br>
+      ${t.text}<br>
+      <button onclick="terminLoeschen('${t.id}')">Termin löschen</button>
+    </div>
+  `).join("");
+}
