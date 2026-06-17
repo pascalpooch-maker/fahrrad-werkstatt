@@ -768,3 +768,132 @@ function kategorienAnzeigen(){
 }
 
 window.addEventListener("load", kategorienAnzeigen);
+
+let lagerEditId = null;
+
+function lagerBearbeiten(id) {
+  const teil = lager.find(t => String(t.id) === String(id));
+  if (!teil) return;
+
+  lagerEditId = id;
+
+  document.getElementById("lagerName").value = teil.name || "";
+  document.getElementById("lagerKategorie").value = teil.kategorie || "";
+  document.getElementById("lagerBestand").value = teil.bestand || 0;
+  document.getElementById("lagerMinimum").value = teil.minimum || 0;
+  document.getElementById("lagerEk").value = teil.ek || 0;
+  document.getElementById("lagerAufschlag").value = teil.aufschlag || 0;
+
+  zeigeTab("lager");
+}
+
+function lagerLoeschen(id) {
+  if (!confirm("Lagerartikel wirklich löschen?")) return;
+
+  lager = lager.filter(t => String(t.id) !== String(id));
+
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function lagerSpeichern() {
+  const ek = Number(document.getElementById("lagerEk").value || 0);
+  const aufschlag = Number(document.getElementById("lagerAufschlag").value || 0);
+  const vk = ek + (ek * aufschlag / 100);
+
+  const daten = {
+    id: lagerEditId || Date.now(),
+    name: document.getElementById("lagerName").value,
+    kategorie: document.getElementById("lagerKategorie")?.value || "",
+    bestand: Number(document.getElementById("lagerBestand").value || 0),
+    minimum: Number(document.getElementById("lagerMinimum")?.value || 0),
+    ek,
+    vk,
+    aufschlag
+  };
+
+  if (!daten.name) {
+    alert("Bitte Artikelnamen eintragen.");
+    return;
+  }
+
+  if (lagerEditId) {
+    const index = lager.findIndex(t => String(t.id) === String(lagerEditId));
+    if (index >= 0) lager[index] = daten;
+    lagerEditId = null;
+  } else {
+    lager.push(daten);
+  }
+
+  document.getElementById("lagerName").value = "";
+  document.getElementById("lagerBestand").value = "";
+  document.getElementById("lagerEk").value = "";
+
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function lagerAnzeigen() {
+  const liste = document.getElementById("lagerListe");
+  if (!liste) return;
+
+  liste.innerHTML = lager.map(t => {
+    const warnung = Number(t.bestand || 0) <= Number(t.minimum || 0);
+
+    return `
+      <div class="auftrag">
+        <b>${t.name}</b><br>
+        Kategorie: ${t.kategorie || "-"}<br>
+        Bestand: ${t.bestand}<br>
+        Mindestbestand: ${t.minimum || 0}<br>
+        EK: ${Number(t.ek || 0).toFixed(2)} €<br>
+        VK: ${Number(t.vk || 0).toFixed(2)} €<br>
+        ${warnung ? "<b>⚠ Nachbestellen</b><br>" : ""}
+        <button onclick="lagerBearbeiten('${t.id}')">Bearbeiten</button>
+        <button onclick="lagerLoeschen('${t.id}')">Löschen</button>
+      </div>
+    `;
+  }).join("");
+
+  lagerSelectAktualisieren();
+}
+
+function lagerSelectAktualisieren() {
+  const select = document.getElementById("auftragLagerArtikel");
+  if (!select) return;
+
+  select.innerHTML =
+    `<option value="">Artikel auswählen</option>` +
+    lager.map(t => `
+      <option value="${t.id}">
+        ${t.name} · Bestand ${t.bestand} · VK ${Number(t.vk || 0).toFixed(2)} €
+      </option>
+    `).join("");
+}
+
+function lagerArtikelZumAuftrag() {
+  const id = document.getElementById("auftragLagerArtikel").value;
+  if (!id) return;
+
+  const teil = lager.find(t => String(t.id) === String(id));
+  if (!teil) return;
+
+  if (Number(teil.bestand || 0) <= 0) {
+    alert("Artikel ist nicht auf Lager.");
+    return;
+  }
+
+  teil.bestand = Number(teil.bestand || 0) - 1;
+
+  const materialFeld = document.getElementById("material");
+  const preisFeld = document.getElementById("materialpreis");
+
+  const bisher = materialFeld.value ? materialFeld.value + "\n" : "";
+  materialFeld.value = bisher + `${teil.name} (${Number(teil.vk || 0).toFixed(2)} €)`;
+
+  preisFeld.value =
+    Number(preisFeld.value || 0) + Number(teil.vk || 0);
+
+  speichernDaten();
+  allesAktualisieren();
+}
