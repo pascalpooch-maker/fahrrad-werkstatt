@@ -28,6 +28,7 @@
 <button onclick="zeigeTab('belege')">Belege</button>
 <button onclick="zeigeTab('rechnung')">Rechnung</button>
 <button onclick="zeigeTab('backup')">Backup</button>
+<button onclick="zeigeTab('leistungen')">Leistungen</button>
 </nav>
 
 <section id="dashboard" class="tab card">
@@ -278,6 +279,23 @@ Drucken / PDF speichern
 </button>
 </section>
 
+<section id="leistungen" class="tab card">
+<h2>🛠️ Leistungen verwalten</h2>
+
+<label>Leistungsname</label>
+<input id="leistungName" placeholder="z.B. Laufrad zentrieren">
+
+<label>Arbeitszeit in Stunden</label>
+<input id="leistungZeit" type="number" step="0.1" value="1">
+
+<label>Stundensatz €</label>
+<input id="leistungStundensatz" type="number" step="0.01" value="45">
+
+<button onclick="leistungSpeichern()">Leistung speichern</button>
+
+<div id="leistungenListe"></div>
+</section>
+  
 <section id="backup" class="tab card">
 <h2>💾 Backup</h2>
 
