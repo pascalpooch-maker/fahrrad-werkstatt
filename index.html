@@ -209,6 +209,28 @@
 <button onclick="window.print()">Drucken / PDF speichern</button>
 </section>
 
+<section id="wareneingang" class="tab card">
+
+<h2>📦 Intelligenter Wareneingang</h2>
+
+<label>PDF-Einkaufsrechnung hochladen</label>
+<input id="wareneingangPdf" type="file" accept="application/pdf">
+
+<button onclick="pdfRechnungLesen()">
+PDF auslesen
+</button>
+
+<h3>Erkannte Daten</h3>
+<div id="pdfErgebnis"></div>
+
+<h3>Erkannte Artikel</h3>
+<div id="pdfArtikelListe"></div>
+
+<button onclick="artikelInsLagerUebernehmen()">
+Artikel ins Lager übernehmen
+</button>
+
+</section>
 <section id="backup" class="tab card">
 <h2>Backup</h2>
 <button onclick="backupExport()">Backup exportieren</button>
