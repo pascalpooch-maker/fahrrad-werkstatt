@@ -633,3 +633,95 @@ async function auftragSpeichern() {
   allesAktualisieren();
   zeigeTab("liste");
 }
+let eigeneLeistungen = JSON.parse(localStorage.getItem("eigeneLeistungen")) || [
+  { name:"Frühjahrs-Check", zeit:1.2, stundensatz:45, preis:55 },
+  { name:"Reifenwechsel", zeit:0.45, stundensatz:45, preis:20 },
+  { name:"Schlauch wechseln", zeit:0.33, stundensatz:45, preis:15 },
+  { name:"Bremsen einstellen", zeit:0.33, stundensatz:45, preis:15 },
+  { name:"Schaltung einstellen", zeit:0.45, stundensatz:45, preis:20 },
+  { name:"Kette wechseln", zeit:0.55, stundensatz:45, preis:25 },
+  { name:"Große Inspektion", zeit:2.9, stundensatz:45, preis:129 },
+  { name:"E-Bike Diagnose", zeit:0.8, stundensatz:45, preis:35 }
+];
+
+function leistungSpeichern(){
+  const name = document.getElementById("leistungName").value;
+  const zeit = Number(document.getElementById("leistungZeit").value || 0);
+  const stundensatz = Number(document.getElementById("leistungStundensatz").value || 0);
+  const preis = zeit * stundensatz;
+
+  if(!name){
+    alert("Bitte Leistungsname eintragen.");
+    return;
+  }
+
+  eigeneLeistungen.push({
+    name,
+    zeit,
+    stundensatz,
+    preis
+  });
+
+  localStorage.setItem("eigeneLeistungen", JSON.stringify(eigeneLeistungen));
+
+  document.getElementById("leistungName").value = "";
+  document.getElementById("leistungZeit").value = 1;
+
+  leistungenAnzeigen();
+  leistungsCheckboxenAktualisieren();
+}
+
+function leistungenAnzeigen(){
+  const liste = document.getElementById("leistungenListe");
+  if(!liste) return;
+
+  liste.innerHTML = eigeneLeistungen.map((l,i)=>`
+    <div class="auftrag">
+      <b>${l.name}</b><br>
+      Zeit: ${l.zeit} h<br>
+      Stundensatz: ${Number(l.stundensatz).toFixed(2)} €<br>
+      Preis: ${Number(l.preis).toFixed(2)} €<br>
+      <button onclick="leistungLoeschen(${i})">Löschen</button>
+    </div>
+  `).join("");
+}
+
+function leistungLoeschen(index){
+  if(!confirm("Leistung löschen?")) return;
+
+  eigeneLeistungen.splice(index,1);
+  localStorage.setItem("eigeneLeistungen", JSON.stringify(eigeneLeistungen));
+
+  leistungenAnzeigen();
+  leistungsCheckboxenAktualisieren();
+}
+
+function leistungsCheckboxenAktualisieren(){
+  const container = document.getElementById("leistungenContainer");
+  if(!container) return;
+
+  container.innerHTML = eigeneLeistungen.map(l=>`
+    <label>
+      <input type="checkbox" class="leistungCheck" value="${l.name}|${l.preis}">
+      ${l.name} – ${Number(l.preis).toFixed(2)} €
+    </label><br>
+  `).join("");
+}
+
+const alteSpeichernDatenLeistungen = speichernDaten;
+speichernDaten = function(){
+  alteSpeichernDatenLeistungen();
+  localStorage.setItem("eigeneLeistungen", JSON.stringify(eigeneLeistungen));
+};
+
+const alteAllesAktualisierenLeistungen = allesAktualisieren;
+allesAktualisieren = function(){
+  alteAllesAktualisierenLeistungen();
+  leistungenAnzeigen();
+  leistungsCheckboxenAktualisieren();
+};
+
+window.addEventListener("load", function(){
+  leistungsCheckboxenAktualisieren();
+  leistungenAnzeigen();
+});
