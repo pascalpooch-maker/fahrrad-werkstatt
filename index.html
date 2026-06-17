@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fahrrad Werkstatt</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:900px;margin:auto;padding:20px}
+input,textarea,button{width:100%;padding:10px;margin:5px 0}
+.card{border:1px solid #ccc;padding:10px;margin:10px 0;border-radius:8px}
+</style>
+</head>
+<body>
+
+<h1>🚲 Fahrrad Werkstatt</h1>
+
+<input id="kunde" placeholder="Kunde">
+<input id="telefon" placeholder="Telefon">
+<input id="fahrrad" placeholder="Fahrrad">
+
+<textarea id="arbeit" placeholder="Arbeiten"></textarea>
+
+<input id="teile" type="number" placeholder="Teilekosten">
+
+<input id="stunden" type="number" step="0.1" placeholder="Arbeitsstunden">
+
+<button onclick="speichern()">Auftrag speichern</button>
+
+<h2>Aufträge</h2>
+<div id="liste"></div>
+
+<script>
+let daten=JSON.parse(localStorage.getItem("werkstatt")||"[]");
+
+function render(){
+let html="";
+daten.forEach(a=>{
+let gesamt=(a.teile)+(a.stunden*45);
+html+=`
+<div class="card">
+<b>${a.kunde}</b><br>
+${a.telefon}<br>
+${a.fahrrad}<br>
+${a.arbeit}<br>
+<b>${gesamt.toFixed(2)} €</b>
+</div>`;
+});
+document.getElementById("liste").innerHTML=html;
+}
+
+function speichern(){
+daten.push({
+kunde:kunde.value,
+telefon:telefon.value,
+fahrrad:fahrrad.value,
+arbeit:arbeit.value,
+teile:Number(teile.value||0),
+stunden:Number(stunden.value||0)
+});
+localStorage.setItem("werkstatt",JSON.stringify(daten));
+render();
+}
+
+render();
+</script>
+
+</body>
+</html>
