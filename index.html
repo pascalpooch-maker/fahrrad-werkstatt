@@ -2,67 +2,39 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fahrrad Werkstatt</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Werkstatt V2">
+<title>Fahrrad Werkstatt V2</title>
 <style>
-body{font-family:Arial,sans-serif;max-width:900px;margin:auto;padding:20px}
-input,textarea,button{width:100%;padding:10px;margin:5px 0}
-.card{border:1px solid #ccc;padding:10px;margin:10px 0;border-radius:8px}
+:root{--bg:#f6f7fb;--card:#fff;--text:#111;--muted:#666;--line:#ddd;--accent:#0b7cff;--danger:#c62828;--ok:#2e7d32;--warn:#ef6c00}
+*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0}.wrap{max-width:1050px;margin:auto;padding:14px}header{position:sticky;top:0;background:var(--bg);z-index:5;padding:10px 0;border-bottom:1px solid var(--line)}h1{font-size:24px;margin:0 0 8px}.tabs{display:flex;gap:6px;overflow:auto}.tabs button{width:auto;white-space:nowrap}.tab{display:none}.tab.active{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0;box-shadow:0 1px 3px #0001}input,textarea,select{width:100%;padding:11px;margin:5px 0 10px;border:1px solid #bbb;border-radius:9px;font-size:16px;background:#fff}textarea{min-height:80px}button{border:0;background:var(--accent);color:white;padding:11px 13px;border-radius:10px;font-size:15px;margin:3px;cursor:pointer}.ghost{background:#e9eef8;color:#111}.danger{background:var(--danger)}.ok{background:var(--ok)}.warn{background:var(--warn)}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.pill{display:inline-block;padding:4px 8px;border-radius:99px;background:#eee;font-size:13px}.muted{color:var(--muted);font-size:14px}.price{font-size:22px;font-weight:700}.right{text-align:right}.list{display:grid;gap:8px}.item{border-left:5px solid var(--accent)}.item.fertig{border-left-color:var(--ok)}.item.warten{border-left-color:var(--warn)}.item.bezahlt{border-left-color:#555}.small{font-size:13px}.hide{display:none}@media(max-width:750px){.grid{grid-template-columns:1fr}.wrap{padding:10px}button{width:100%;margin:4px 0}.tabs button{width:auto}}
+@media print{header,.noPrint,button{display:none!important}body{background:#fff}.card{box-shadow:none;border:0}.wrap{max-width:none}}
 </style>
 </head>
-<body>
-
-<h1>🚲 Fahrrad Werkstatt</h1>
-
-<input id="kunde" placeholder="Kunde">
-<input id="telefon" placeholder="Telefon">
-<input id="fahrrad" placeholder="Fahrrad">
-
-<textarea id="arbeit" placeholder="Arbeiten"></textarea>
-
-<input id="teile" type="number" placeholder="Teilekosten">
-
-<input id="stunden" type="number" step="0.1" placeholder="Arbeitsstunden">
-
-<button onclick="speichern()">Auftrag speichern</button>
-
-<h2>Aufträge</h2>
-<div id="liste"></div>
-
+<body><div class="wrap">
+<header>
+<h1>🚲 Fahrrad Werkstatt V2</h1>
+<div class="tabs noPrint">
+<button onclick="tab('auftraege')">Aufträge</button><button onclick="tab('neu')">Neuer Auftrag</button><button onclick="tab('kunden')">Kunden</button><button onclick="tab('lager')">Lager</button><button onclick="tab('auswertung')">Auswertung</button><button onclick="tab('daten')">Backup</button>
+</div>
+</header>
+<section id="auftraege" class="tab active"><div class="card"><input id="suche" oninput="render()" placeholder="Suchen: Kunde, Telefon, Fahrrad, Arbeit"><select id="filter" onchange="render()"><option value="">Alle Status</option><option>Neu</option><option>Warten auf Freigabe</option><option>Warten auf Teile</option><option>In Arbeit</option><option>Fertig</option><option>Bezahlt</option></select></div><div id="auftragsListe" class="list"></div></section>
+<section id="neu" class="tab"><div class="card"><h2>Neuer Auftrag</h2><div class="grid"><div><label>Kunde</label><input id="kunde" placeholder="Name"><label>Telefon</label><input id="telefon" placeholder="Telefon"><label>E-Mail</label><input id="email" placeholder="E-Mail"></div><div><label>Fahrrad</label><input id="fahrrad" placeholder="Marke / Modell"><label>Rahmennummer</label><input id="rahmen" placeholder="optional"><label>Status</label><select id="status"><option>Neu</option><option>Warten auf Freigabe</option><option>Warten auf Teile</option><option>In Arbeit</option><option>Fertig</option><option>Bezahlt</option></select></div></div><label>Diagnose / Arbeiten</label><textarea id="arbeit" placeholder="z.B. Kette und Kassette wechseln, Schaltung einstellen"></textarea><div class="grid"><div><label>Teilebeschreibung</label><textarea id="teileText" placeholder="Kette 11-fach, Kassette, Bremsbeläge..."></textarea></div><div><label>Teilekosten Einkauf €</label><input id="teileEk" type="number" step="0.01" placeholder="0"><label>Teile Verkauf €</label><input id="teileVk" type="number" step="0.01" placeholder="0"><label>Arbeitsstunden</label><input id="stunden" type="number" step="0.1" placeholder="0"><label>Stundensatz €</label><input id="satz" type="number" step="0.01" value="45"></div></div><button onclick="speichern()">Auftrag speichern</button></div></section>
+<section id="kunden" class="tab"><div id="kundenListe"></div></section>
+<section id="lager" class="tab"><div class="card"><h2>Lagerteil hinzufügen</h2><div class="grid"><input id="lagerName" placeholder="Teil"><input id="lagerMenge" type="number" placeholder="Menge"><input id="lagerMin" type="number" placeholder="Mindestbestand"><input id="lagerPreis" type="number" step="0.01" placeholder="EK Preis €"></div><button onclick="lagerAdd()">Speichern</button></div><div id="lagerListe"></div></section>
+<section id="auswertung" class="tab"><div id="stats"></div></section>
+<section id="daten" class="tab"><div class="card"><h2>Backup</h2><button onclick="exportData()">Backup exportieren</button><input type="file" id="importFile" accept="application/json" onchange="importData(event)"><button class="danger" onclick="resetAll()">Alles löschen</button><p class="muted">Daten werden nur in diesem Browser auf diesem Gerät gespeichert. Regelmäßig Backup exportieren.</p></div></section>
+</div>
 <script>
-let daten=JSON.parse(localStorage.getItem("werkstatt")||"[]");
-
-function render(){
-let html="";
-daten.forEach(a=>{
-let gesamt=(a.teile)+(a.stunden*45);
-html+=`
-<div class="card">
-<b>${a.kunde}</b><br>
-${a.telefon}<br>
-${a.fahrrad}<br>
-${a.arbeit}<br>
-<b>${gesamt.toFixed(2)} €</b>
-</div>`;
-});
-document.getElementById("liste").innerHTML=html;
-}
-
-function speichern(){
-daten.push({
-kunde:kunde.value,
-telefon:telefon.value,
-fahrrad:fahrrad.value,
-arbeit:arbeit.value,
-teile:Number(teile.value||0),
-stunden:Number(stunden.value||0)
-});
-localStorage.setItem("werkstatt",JSON.stringify(daten));
-render();
-}
-
-render();
-</script>
-
-</body>
-</html>
+const KEY='fw_v2';let db=load();function load(){return JSON.parse(localStorage.getItem(KEY)||'{"jobs":[],"parts":[],"next":1}')}function save(){localStorage.setItem(KEY,JSON.stringify(db))}function euro(n){return (Number(n)||0).toFixed(2).replace('.',',')+' €'}function esc(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}function tab(id){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');render()}
+function speichern(){let j={id:'A-'+String(db.next++).padStart(4,'0'),date:new Date().toISOString().slice(0,10),kunde:kunde.value,telefon:telefon.value,email:email.value,fahrrad:fahrrad.value,rahmen:rahmen.value,status:status.value,arbeit:arbeit.value,teileText:teileText.value,teileEk:+teileEk.value||0,teileVk:+teileVk.value||0,stunden:+stunden.value||0,satz:+satz.value||45};db.jobs.unshift(j);save();['kunde','telefon','email','fahrrad','rahmen','arbeit','teileText','teileEk','teileVk','stunden'].forEach(id=>document.getElementById(id).value='');satz.value=45;tab('auftraege')}
+function ges(j){return j.teileVk+j.stunden*j.satz}function gew(j){return ges(j)-j.teileEk}
+function render(){let q=(suche?.value||'').toLowerCase(),f=filter?.value||'';let jobs=db.jobs.filter(j=>(!f||j.status==f)&&JSON.stringify(j).toLowerCase().includes(q));auftragsListe.innerHTML=jobs.map((j,i)=>`<div class="card item ${j.status.toLowerCase().split(' ')[0]}"><div class="row"><b>${esc(j.id)} · ${esc(j.kunde)}</b><span class="pill">${esc(j.status)}</span></div><div class="muted">${esc(j.date)} · ${esc(j.telefon)} · ${esc(j.fahrrad)}</div><p>${esc(j.arbeit)}</p><p class="small"><b>Teile:</b> ${esc(j.teileText)}</p><div class="row"><span class="price">${euro(ges(j))}</span><span class="muted">Gewinn ca. ${euro(gew(j))}</span></div><div class="row noPrint"><select onchange="setStatus('${j.id}',this.value)"><option>${j.status}</option><option>Neu</option><option>Warten auf Freigabe</option><option>Warten auf Teile</option><option>In Arbeit</option><option>Fertig</option><option>Bezahlt</option></select><button class="ghost" onclick="rechnung('${j.id}')">Rechnung/Druck</button><button class="danger" onclick="delJob('${j.id}')">Löschen</button></div></div>`).join('')||'<div class="card">Keine Aufträge.</div>';renderKunden();renderLager();renderStats()}
+function setStatus(id,s){let j=db.jobs.find(x=>x.id==id);j.status=s;save();render()}function delJob(id){if(confirm('Auftrag löschen?')){db.jobs=db.jobs.filter(x=>x.id!=id);save();render()}}
+function rechnung(id){let j=db.jobs.find(x=>x.id==id);let w=open('','_blank');w.document.write(`<html><head><title>Rechnung ${j.id}</title><style>body{font-family:Arial;padding:30px}h1{font-size:26px}.right{text-align:right}.box{border:1px solid #ccc;padding:15px;margin:15px 0}</style></head><body><h1>Rechnung / Auftrag ${j.id}</h1><p><b>Kunde:</b> ${esc(j.kunde)}<br>${esc(j.telefon)}<br>${esc(j.email)}</p><div class="box"><b>Fahrrad:</b> ${esc(j.fahrrad)}<br><b>Rahmennummer:</b> ${esc(j.rahmen)}<br><b>Arbeiten:</b><br>${esc(j.arbeit)}<br><br><b>Teile:</b><br>${esc(j.teileText)}</div><p>Teile: ${euro(j.teileVk)}<br>Arbeit: ${euro(j.stunden*j.satz)}<br><b>Gesamt: ${euro(ges(j))}</b></p><script>print()<\/script></body></html>`)}
+function renderKunden(){let map={};db.jobs.forEach(j=>{if(!j.kunde)return;map[j.kunde]=map[j.kunde]||{n:j.kunde,t:j.telefon,e:j.email,c:0,u:0};map[j.kunde].c++;map[j.kunde].u+=ges(j)});kundenListe.innerHTML='<div class="card"><h2>Kunden</h2>'+Object.values(map).map(k=>`<p><b>${esc(k.n)}</b><br>${esc(k.t)} ${esc(k.e)}<br>${k.c} Auftrag/Aufträge · ${euro(k.u)}</p>`).join('')+'</div>'}
+function lagerAdd(){db.parts.push({name:lagerName.value,qty:+lagerMenge.value||0,min:+lagerMin.value||0,price:+lagerPreis.value||0});save();lagerName.value=lagerMenge.value=lagerMin.value=lagerPreis.value='';renderLager()}function renderLager(){lagerListe.innerHTML=db.parts.map((p,i)=>`<div class="card"><b>${esc(p.name)}</b> <span class="pill ${p.qty<=p.min?'warn':''}">Bestand ${p.qty}</span><br><span class="muted">Minimum ${p.min} · EK ${euro(p.price)}</span><div class="row noPrint"><button class="ghost" onclick="pQty(${i},1)">+1</button><button class="ghost" onclick="pQty(${i},-1)">-1</button><button class="danger" onclick="pDel(${i})">Löschen</button></div></div>`).join('')||'<div class="card">Noch keine Lagerteile.</div>'}function pQty(i,d){db.parts[i].qty+=d;save();renderLager()}function pDel(i){db.parts.splice(i,1);save();renderLager()}
+function renderStats(){let u=db.jobs.reduce((s,j)=>s+ges(j),0),g=db.jobs.reduce((s,j)=>s+gew(j),0),off=db.jobs.filter(j=>j.status!='Bezahlt').length;stats.innerHTML=`<div class="grid"><div class="card"><h2>Umsatz</h2><div class="price">${euro(u)}</div></div><div class="card"><h2>Gewinn ca.</h2><div class="price">${euro(g)}</div></div><div class="card"><h2>Offen</h2><div class="price">${off}</div></div><div class="card"><h2>Aufträge</h2><div class="price">${db.jobs.length}</div></div></div>`}
+function exportData(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}));a.download='werkstatt-backup.json';a.click()}function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{db=JSON.parse(r.result);save();render();alert('Backup importiert')};r.readAsText(f)}function resetAll(){if(confirm('Wirklich alles löschen?')){localStorage.removeItem(KEY);db=load();render()}}render();
+</script></body></html>
