@@ -1,68 +1,112 @@
 body{
-  font-family:Arial,sans-serif;
-  background:#f5f7fa;
-  margin:0;
-  padding:0;
+font-family:Arial,sans-serif;
+background:#f3f4f6;
+margin:0;
+padding:0;
 }
 
 header{
-  background:#1f2937;
-  color:white;
-  padding:15px;
-  text-align:center;
+background:#1f2937;
+color:white;
+padding:20px;
+text-align:center;
 }
 
 .container{
-  padding:15px;
+padding:15px;
+max-width:1200px;
+margin:auto;
 }
 
 .card{
-  background:white;
-  border-radius:12px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 2px 8px rgba(0,0,0,.1);
-}
-
-button{
-  background:#2563eb;
-  color:white;
-  border:none;
-  padding:10px 15px;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-button:hover{
-  opacity:.9;
-}
-
-input,select,textarea{
-  width:100%;
-  padding:10px;
-  margin-top:5px;
-  margin-bottom:10px;
-  border:1px solid #ccc;
-  border-radius:8px;
-  box-sizing:border-box;
+background:white;
+padding:15px;
+border-radius:12px;
+margin-bottom:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.1);
 }
 
 .tabbar{
-  display:flex;
-  gap:10px;
-  overflow:auto;
-  margin-bottom:15px;
+display:flex;
+gap:10px;
+overflow-x:auto;
+margin-bottom:15px;
 }
 
-.stat{
-  font-size:20px;
-  font-weight:bold;
+button{
+background:#2563eb;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:8px;
+cursor:pointer;
+}
+
+button:hover{
+opacity:.9;
+}
+
+input,
+select,
+textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:10px;
+border:1px solid #d1d5db;
+border-radius:8px;
+box-sizing:border-box;
+}
+
+.tab{
+display:none;
+}
+
+.tab.active{
+display:block;
+}
+
+.auftrag{
+border:1px solid #e5e7eb;
+padding:10px;
+margin-top:10px;
+border-radius:10px;
 }
 
 .status-offen{
-  color:#dc2626;
+color:#dc2626;
+font-weight:bold;
 }
 
 .status-fertig{
-  color:#16a34a;
+color:#16a34a;
+font-weight:bold;
+}
+
+.status-arbeit{
+color:#ca8a04;
+font-weight:bold;
+}
+
+.status-bezahlt{
+color:#2563eb;
+font-weight:bold;
+}
+
+img{
+max-width:120px;
+border-radius:8px;
+margin:5px;
+}
+
+@media (max-width:768px){
+
+.tabbar{
+flex-wrap:nowrap;
+}
+
+button{
+min-width:120px;
+}
+
 }
