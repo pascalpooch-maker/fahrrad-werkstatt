@@ -27,6 +27,7 @@
 <button onclick="zeigeTab('belege')">PDF-Belege</button>
 <button onclick="zeigeTab('rechnung')">Rechnung</button>
 <button onclick="zeigeTab('backup')">Backup</button>
+<button onclick="zeigeTab('wareneingang')">Wareneingang</button>
 </nav>
 
 <section id="dashboard" class="tab card">
@@ -241,6 +242,11 @@ Artikel ins Lager übernehmen
 </div>
 
 <script src="app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+</script>
 
 </body>
 </html>
