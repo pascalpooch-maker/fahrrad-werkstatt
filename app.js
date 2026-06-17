@@ -157,3 +157,149 @@ function formularLeeren() {
   document.getElementById("bilder").value = "";
   document.getElementById("formularTitel").innerText = "Neuer Auftrag";
 }
+function lagerSpeichern() {
+  const ek = Number(document.getElementById("lagerEk").value || 0);
+  const aufschlag = Number(document.getElementById("lagerAufschlag").value || 0);
+  const vk = ek + (ek * aufschlag / 100);
+
+  lager.push({
+    id: Date.now(),
+    name: document.getElementById("lagerName").value,
+    bestand: Number(document.getElementById("lagerBestand").value || 0),
+    ek,
+    vk,
+    aufschlag
+  });
+
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function bestellungSpeichern() {
+  bestellungen.push({
+    id: Date.now(),
+    kunde: document.getElementById("bestellKunde").value,
+    teil: document.getElementById("bestellTeil").value,
+    status: document.getElementById("bestellStatus").value
+  });
+
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function terminSpeichern() {
+  termine.push({
+    id: Date.now(),
+    datum: document.getElementById("terminDatum").value,
+    zeit: document.getElementById("terminZeit").value,
+    text: document.getElementById("terminText").value
+  });
+
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function lagerAnzeigen() {
+  document.getElementById("lagerListe").innerHTML = lager.map(t => `
+    <div class="auftrag">
+      <b>${t.name}</b><br>
+      Bestand: ${t.bestand}<br>
+      EK: ${Number(t.ek).toFixed(2)} €<br>
+      VK: ${Number(t.vk).toFixed(2)} €
+    </div>
+  `).join("");
+}
+
+function bestellungenAnzeigen() {
+  document.getElementById("bestellListe").innerHTML = bestellungen.map(b => `
+    <div class="auftrag">
+      <b>${b.kunde}</b><br>
+      Teil: ${b.teil}<br>
+      Status: ${b.status}
+    </div>
+  `).join("");
+}
+
+function termineAnzeigen() {
+  document.getElementById("terminListe").innerHTML = termine.map(t => `
+    <div class="auftrag">
+      <b>${t.datum} ${t.zeit}</b><br>
+      ${t.text}
+    </div>
+  `).join("");
+}
+
+function dashboardAnzeigen() {
+  const offen = auftraege.filter(a => a.status !== "Bezahlt").length;
+  const umsatz = auftraege.reduce((s,a) => s + Number(a.preis || 0) + Number(a.materialpreis || 0), 0);
+
+  document.getElementById("dashboardInhalt").innerHTML = `
+    <p><b>Offene Aufträge:</b> ${offen}</p>
+    <p><b>Gesamtumsatz:</b> ${umsatz.toFixed(2)} €</p>
+    <p><b>Bestellungen:</b> ${bestellungen.length}</p>
+    <p><b>Termine:</b> ${termine.length}</p>
+    <p><b>Lagerartikel:</b> ${lager.length}</p>
+  `;
+}
+
+function rechnungErstellen(id) {
+  const a = auftraege.find(x => x.id === id);
+  if (!a) return;
+
+  const gesamt = Number(a.preis || 0) + Number(a.materialpreis || 0);
+  const qrText = location.origin + location.pathname + "?auftrag=" + a.id;
+
+  document.getElementById("rechnungInhalt").innerHTML = `
+    <h2>Rechnung</h2>
+    <p><b>Auftrag:</b> ${a.id}</p>
+    <p><b>Kunde:</b> ${a.kunde}</p>
+    <p><b>Fahrrad:</b> ${a.fahrrad}</p>
+    <hr>
+    <p>${a.leistung}: ${Number(a.preis || 0).toFixed(2)} €</p>
+    <p>${a.material || "Material"}: ${Number(a.materialpreis || 0).toFixed(2)} €</p>
+    <h3>Gesamt: ${gesamt.toFixed(2)} €</h3>
+    <p><b>QR-Code Link:</b></p>
+    <div style="font-size:12px;word-break:break-all">${qrText}</div>
+  `;
+
+  zeigeTab("rechnung");
+}
+
+function backupExport() {
+  const backup = {
+    auftraege,
+    lager,
+    bestellungen,
+    termine
+  };
+
+  document.getElementById("backupText").value = JSON.stringify(backup);
+}
+
+function backupImport() {
+  try {
+    const backup = JSON.parse(document.getElementById("backupText").value);
+    auftraege = backup.auftraege || [];
+    lager = backup.lager || [];
+    bestellungen = backup.bestellungen || [];
+    termine = backup.termine || [];
+    speichernDaten();
+    allesAktualisieren();
+    alert("Backup importiert.");
+  } catch {
+    alert("Backup konnte nicht importiert werden.");
+  }
+}
+
+function allesAktualisieren() {
+  auftraegeAnzeigen();
+  lagerAnzeigen();
+  bestellungenAnzeigen();
+  termineAnzeigen();
+  dashboardAnzeigen();
+}
+
+window.onload = function() {
+  zeigeTab("dashboard");
+  allesAktualisieren();
+};
