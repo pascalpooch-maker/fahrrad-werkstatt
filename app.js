@@ -581,3 +581,55 @@ function termineAnzeigen() {
     </div>
   `).join("");
 }
+function leistungenAuslesen() {
+  return Array.from(document.querySelectorAll(".leistungCheck:checked")).map(c => {
+    const [name, preis] = c.value.split("|");
+    return { name, preis: Number(preis || 0) };
+  });
+}
+
+async function auftragSpeichern() {
+  const leistungen = leistungenAuslesen();
+  const gesamtLeistung = leistungen.reduce((s,l) => s + l.preis, 0);
+  const editId = document.getElementById("editId").value;
+  const neueBilder = await bilderLesen(document.getElementById("bilder"));
+
+  const daten = {
+    id: editId || Date.now(),
+    kunde: document.getElementById("kunde").value,
+    telefon: document.getElementById("telefon").value,
+    email: document.getElementById("email")?.value || "",
+    fahrrad: document.getElementById("fahrrad").value,
+    seriennummer: document.getElementById("seriennummer")?.value || "",
+    leistung: leistungen.map(l => l.name).join(", "),
+    leistungen,
+    preis: gesamtLeistung,
+    notiz: document.getElementById("notiz").value,
+    material: document.getElementById("material").value,
+    materialpreis: Number(document.getElementById("materialpreis").value || 0),
+    status: document.getElementById("status").value,
+    datum: new Date().toLocaleDateString()
+  };
+
+  if (!daten.kunde || !daten.fahrrad) {
+    alert("Bitte Kunde und Fahrrad eintragen.");
+    return;
+  }
+
+  if (editId) {
+    const index = auftraege.findIndex(a => String(a.id) === String(editId));
+    if (index >= 0) {
+      daten.bilder = [...(auftraege[index].bilder || []), ...neueBilder];
+      auftraege[index] = daten;
+    }
+  } else {
+    daten.bilder = neueBilder;
+    daten.leistungen.forEach(l => lagerFuerAuftragPruefen({ ...daten, leistung: l.name }));
+    auftraege.push(daten);
+  }
+
+  speichernDaten();
+  formularLeeren();
+  allesAktualisieren();
+  zeigeTab("liste");
+}
