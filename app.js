@@ -308,3 +308,255 @@ function lagerAnzeigen() {
     `;
   }).join("");
 }
+async function wareneingangArtikelSpeichern() {
+  const name = document.getElementById("weArtikel").value;
+  const menge = Number(document.getElementById("weMenge").value || 1);
+  const ek = Number(document.getElementById("weEk").value || 0);
+  const aufschlag = Number(document.getElementById("weAufschlag").value || 0);
+  const vk = ek + (ek * aufschlag / 100);
+  const pdf = await dateiLesen(document.getElementById("wePdf"));
+
+  if (!name) {
+    alert("Bitte Artikel eintragen.");
+    return;
+  }
+
+  const vorhandenesTeil = lager.find(t =>
+    t.name && t.name.toLowerCase() === name.toLowerCase()
+  );
+
+  if (vorhandenesTeil) {
+    vorhandenesTeil.bestand = Number(vorhandenesTeil.bestand || 0) + menge;
+    vorhandenesTeil.ek = ek;
+    vorhandenesTeil.vk = vk;
+    vorhandenesTeil.aufschlag = aufschlag;
+  } else {
+    lager.push({
+      id: Date.now(),
+      name,
+      kategorie: "Wareneingang",
+      bestand: menge,
+      minimum: 0,
+      ek,
+      vk,
+      aufschlag
+    });
+  }
+
+  wareneingaenge.push({
+    id: Date.now() + Math.random(),
+    lieferant: document.getElementById("weLieferant").value,
+    nummer: document.getElementById("weNummer").value,
+    artikel: name,
+    menge,
+    ek,
+    vk,
+    pdfName: pdf ? pdf.name : "",
+    pdf: pdf ? pdf.daten : "",
+    datum: new Date().toLocaleDateString()
+  });
+
+  speichernDaten();
+  allesAktualisieren();
+
+  document.getElementById("weArtikel").value = "";
+  document.getElementById("weMenge").value = 1;
+  document.getElementById("weEk").value = "";
+}
+
+function wareneingangAnzeigen() {
+  const liste = document.getElementById("wareneingangListe");
+  if (!liste) return;
+
+  liste.innerHTML = wareneingaenge.map(w => `
+    <div class="auftrag">
+      <b>${w.artikel}</b><br>
+      Lieferant: ${w.lieferant || "-"}<br>
+      Rechnung: ${w.nummer || "-"}<br>
+      Menge: ${w.menge}<br>
+      EK: ${Number(w.ek || 0).toFixed(2)} €<br>
+      VK: ${Number(w.vk || 0).toFixed(2)} €<br>
+      Datum: ${w.datum}<br>
+      ${w.pdf ? `<button onclick="pdfOeffnen('${w.id}','wareneingang')">PDF öffnen</button>` : ""}
+    </div>
+  `).join("");
+}
+
+function pdfOeffnen(id, quelle) {
+  let eintrag = null;
+
+  if (quelle === "wareneingang") {
+    eintrag = wareneingaenge.find(x => String(x.id) === String(id));
+  } else {
+    eintrag = belege.find(x => String(x.id) === String(id));
+  }
+
+  if (!eintrag || !eintrag.pdf) return;
+
+  const win = window.open();
+  win.document.write(`<iframe src="${eintrag.pdf}" style="width:100%;height:100vh;border:0"></iframe>`);
+}
+function bestellungSpeichern() {
+  bestellungen.push({
+    id: Date.now(),
+    kunde: document.getElementById("bestellKunde").value,
+    teil: document.getElementById("bestellTeil").value,
+    status: document.getElementById("bestellStatus").value,
+    auftrag: document.getElementById("bestellAuftrag").value
+  });
+
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function bestellungenAnzeigen() {
+  const liste = document.getElementById("bestellListe");
+  if (!liste) return;
+
+  liste.innerHTML = bestellungen.map(b => `
+    <div class="auftrag">
+      <b>${b.kunde}</b><br>
+      Auftrag: ${b.auftrag || "-"}<br>
+      Teil: ${b.teil}<br>
+      Status: ${b.status}
+    </div>
+  `).join("");
+}
+
+function terminSpeichern() {
+  termine.push({
+    id: Date.now(),
+    datum: document.getElementById("terminDatum").value,
+    zeit: document.getElementById("terminZeit").value,
+    text: document.getElementById("terminText").value
+  });
+
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function termineAnzeigen() {
+  const liste = document.getElementById("terminListe");
+  if (!liste) return;
+
+  liste.innerHTML = termine.map(t => `
+    <div class="auftrag">
+      <b>${t.datum} ${t.zeit}</b><br>
+      ${t.text}
+    </div>
+  `).join("");
+}
+
+async function belegSpeichern() {
+  const pdf = await dateiLesen(document.getElementById("belegDatei"));
+
+  belege.push({
+    id: Date.now(),
+    auftragId: document.getElementById("belegAuftrag").value,
+    lieferant: document.getElementById("belegLieferant").value,
+    nummer: document.getElementById("belegNummer").value,
+    betrag: Number(document.getElementById("belegBetrag").value || 0),
+    pdfName: pdf ? pdf.name : "",
+    pdf: pdf ? pdf.daten : ""
+  });
+
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function belegAuftraegeFuellen() {
+  const select = document.getElementById("belegAuftrag");
+  if (!select) return;
+
+  select.innerHTML =
+    `<option value="">Kein Auftrag</option>` +
+    auftraege.map(a =>
+      `<option value="${a.id}">
+        ${a.kunde} - ${a.fahrrad}
+      </option>`
+    ).join("");
+}
+
+function belegeAnzeigen() {
+  const liste = document.getElementById("belegListe");
+  if (!liste) return;
+
+  liste.innerHTML = belege.map(b => `
+    <div class="auftrag">
+      <b>${b.lieferant}</b><br>
+      Rechnung: ${b.nummer}<br>
+      Betrag: ${Number(b.betrag || 0).toFixed(2)} €<br>
+      ${b.pdf ? `<button onclick="pdfOeffnen('${b.id}','beleg')">PDF öffnen</button>` : ""}
+    </div>
+  `).join("");
+}
+
+function rechnungErstellen(id) {
+  const a = auftraege.find(x => String(x.id) === String(id));
+  if (!a) return;
+
+  const gesamt =
+    Number(a.preis || 0) +
+    Number(a.materialpreis || 0);
+
+  document.getElementById("rechnungInhalt").innerHTML = `
+    <h2>Rechnung</h2>
+    <p><b>Kunde:</b> ${a.kunde}</p>
+    <p><b>Fahrrad:</b> ${a.fahrrad}</p>
+    <p><b>Leistung:</b> ${a.leistung}</p>
+    <p><b>Material:</b> ${a.material || "-"}</p>
+    <h3>Gesamt: ${gesamt.toFixed(2)} €</h3>
+  `;
+
+  zeigeTab("rechnung");
+}
+
+function backupExport() {
+  document.getElementById("backupText").value =
+    JSON.stringify({
+      auftraege,
+      lager,
+      bestellungen,
+      termine,
+      belege,
+      wareneingaenge
+    });
+}
+
+function backupImport() {
+  try {
+    const daten =
+      JSON.parse(document.getElementById("backupText").value);
+
+    auftraege = daten.auftraege || [];
+    lager = daten.lager || [];
+    bestellungen = daten.bestellungen || [];
+    termine = daten.termine || [];
+    belege = daten.belege || [];
+    wareneingaenge = daten.wareneingaenge || [];
+
+    speichernDaten();
+    allesAktualisieren();
+
+    alert("Backup importiert");
+  } catch {
+    alert("Fehler beim Import");
+  }
+}
+
+function allesAktualisieren() {
+  dashboardAnzeigen();
+  auftraegeAnzeigen();
+  kundenAnzeigen();
+  lagerAnzeigen();
+  wareneingangAnzeigen();
+  bestellungenAnzeigen();
+  termineAnzeigen();
+  belegeAnzeigen();
+  belegAuftraegeFuellen();
+}
+
+window.onload = function() {
+  zeigeTab("dashboard");
+  allesAktualisieren();
+};
