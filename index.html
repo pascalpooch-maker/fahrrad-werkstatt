@@ -131,15 +131,14 @@ oninput="auftraegeAnzeigen()">
 <input id="lagerName">
 
 <label>Kategorie</label>
-<select id="lagerKategorie">
-<option>Schlauch</option>
-<option>Reifen</option>
-<option>Kette</option>
-<option>Kassette</option>
-<option>Bremsbelag</option>
-<option>Reinigung</option>
-<option>Sonstiges</option>
-</select>
+<select id="lagerKategorie"></select>
+
+<label>Neue Kategorie</label>
+<input id="neueKategorie" placeholder="z.B. E-Bike, Werkzeug, Pflege">
+
+<button onclick="kategorieSpeichern()">
+Kategorie hinzufügen
+</button>
 
 <label>Bestand</label>
 <input id="lagerBestand" type="number">
