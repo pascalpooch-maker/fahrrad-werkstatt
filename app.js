@@ -681,6 +681,11 @@ function allesAktualisieren(){
 }
 
 window.onload = function(){
-  zeigeTab("dashboard");
-  allesAktualisieren();
+  try{
+    zeigeTab("dashboard");
+    allesAktualisieren();
+  }catch(e){
+    console.error(e);
+    alert("Fehler: " + e.message);
+  }
 };
