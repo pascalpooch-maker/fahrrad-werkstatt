@@ -687,3 +687,272 @@ window.onload = function(){
   zeigeTab("dashboard");
   allesAktualisieren();
 };
+function wert(id){ return document.getElementById(id)?.value || ""; }
+
+async function logoLesen(){
+  const input = document.getElementById("firmaLogo");
+  if(!input || !input.files[0]) return einstellungen.logo || "";
+  const datei = input.files[0];
+  return await new Promise(resolve=>{
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.readAsDataURL(datei);
+  });
+}
+
+async function einstellungenSpeichern(){
+  einstellungen = {
+    firmaName: wert("firmaName"),
+    firmaAdresse: wert("firmaAdresse"),
+    firmaTelefon: wert("firmaTelefon"),
+    firmaEmail: wert("firmaEmail"),
+    firmaSteuer: wert("firmaSteuer"),
+    firmaMwst: Number(wert("firmaMwst") || 0),
+    firmaStundensatz: Number(wert("firmaStundensatz") || 45),
+    logo: await logoLesen()
+  };
+  speichernDaten();
+  alert("Einstellungen gespeichert.");
+}
+
+function rechnungsNummer(a){
+  if(!a.rechnungsnummer){
+    const jahr = new Date().getFullYear();
+    const nr = Number(localStorage.getItem("rechnungNr") || 1);
+    a.rechnungsnummer = `${jahr}-${String(nr).padStart(4,"0")}`;
+    localStorage.setItem("rechnungNr", nr + 1);
+    speichernDaten();
+  }
+  return a.rechnungsnummer;
+}
+
+function auftragStatus(id,status){
+  const a = auftraege.find(x => String(x.id) === String(id));
+  if(!a) return;
+  a.status = status;
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function lagerBestandAendern(id,wert){
+  const t = lager.find(x => String(x.id) === String(id));
+  if(!t) return;
+  t.bestand = Number(t.bestand || 0) + wert;
+  if(t.bestand < 0) t.bestand = 0;
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function lagerSpeichern(){
+  const ek = Number(wert("lagerEk") || 0);
+  const aufschlag = Number(wert("lagerAufschlag") || 0);
+  const daten = {
+    id: wert("lagerEditId") || Date.now(),
+    name: wert("lagerName"),
+    kategorie: wert("lagerKategorie"),
+    lieferant: wert("lagerLieferant"),
+    bestand: Number(wert("lagerBestand") || 0),
+    minimum: Number(wert("lagerMinimum") || 0),
+    ek,
+    vk: ek + (ek * aufschlag / 100),
+    aufschlag
+  };
+
+  if(!daten.name){ alert("Bitte Artikelname eintragen."); return; }
+
+  const i = lager.findIndex(t => String(t.id) === String(daten.id));
+  if(i >= 0) lager[i] = daten;
+  else lager.push(daten);
+
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function lagerBearbeiten(id){
+  const t = lager.find(x => String(x.id) === String(id));
+  if(!t) return;
+
+  document.getElementById("lagerEditId").value = t.id;
+  document.getElementById("lagerName").value = t.name || "";
+  document.getElementById("lagerKategorie").value = t.kategorie || "";
+  if(document.getElementById("lagerLieferant")) document.getElementById("lagerLieferant").value = t.lieferant || "";
+  document.getElementById("lagerBestand").value = t.bestand || 0;
+  document.getElementById("lagerMinimum").value = t.minimum || 0;
+  document.getElementById("lagerEk").value = t.ek || 0;
+  document.getElementById("lagerAufschlag").value = t.aufschlag || 0;
+
+  zeigeTab("lager");
+}
+
+function lagerAnzeigen(){
+  const liste = document.getElementById("lagerListe");
+  if(!liste) return;
+
+  liste.innerHTML = lager.map(t=>{
+    const warnung = Number(t.bestand||0) <= Number(t.minimum||0);
+    return `
+      <div class="auftrag" style="${warnung ? 'border:2px solid red' : ''}">
+        <b>${t.name}</b><br>
+        Kategorie: ${t.kategorie || "-"}<br>
+        Lieferant: ${t.lieferant || "-"}<br>
+        Bestand: ${t.bestand}<br>
+        Mindestbestand: ${t.minimum || 0}<br>
+        EK: ${Number(t.ek||0).toFixed(2)} € · VK: ${Number(t.vk||0).toFixed(2)} €<br>
+        ${warnung ? "<b>🔴 Nachbestellen</b><br>" : ""}
+        <button onclick="lagerBestandAendern('${t.id}',1)">+ Bestand</button>
+        <button onclick="lagerBestandAendern('${t.id}',-1)">- Bestand</button>
+        <button onclick="lagerBearbeiten('${t.id}')">Bearbeiten</button>
+        <button onclick="lagerLoeschen('${t.id}')">Löschen</button>
+      </div>
+    `;
+  }).join("");
+
+  lagerSelectAktualisieren();
+}
+
+function auftraegeAnzeigen(){
+  const liste = document.getElementById("auftragsliste");
+  if(!liste) return;
+  const suche = (document.getElementById("suche")?.value || "").toLowerCase();
+
+  liste.innerHTML = auftraege.filter(a =>
+    (a.kunde||"").toLowerCase().includes(suche) ||
+    (a.fahrrad||"").toLowerCase().includes(suche) ||
+    (a.status||"").toLowerCase().includes(suche)
+  ).map(a=>{
+    const gesamt = Number(a.preis||0)+Number(a.materialpreis||0);
+    return `
+      <div class="auftrag">
+        <h3>${a.kunde}</h3>
+        <p><b>Fahrrad:</b> ${a.fahrrad}</p>
+        <p><b>Adresse:</b><br>${(a.adresse || "-").replaceAll("\n","<br>")}</p>
+        <p><b>Leistungen:</b> ${a.leistung || "-"}</p>
+        <p><b>Material:</b><br>${(a.material || "-").replaceAll("\n","<br>")}</p>
+        <p><b>Status:</b> ${a.status}</p>
+        <p><b>Zahlung:</b> ${a.zahlungsart || "Offen"}</p>
+        <p><b>Fertigstellung:</b> ${a.fertigTermin || "-"}</p>
+        <p><b>Gesamt:</b> ${gesamt.toFixed(2)} €</p>
+
+        <button onclick="auftragStatus('${a.id}','In Arbeit')">In Arbeit</button>
+        <button onclick="auftragStatus('${a.id}','Fertig')">Fertig</button>
+        <button onclick="auftragStatus('${a.id}','Abgeholt')">Abgeholt</button>
+        <button onclick="auftragStatus('${a.id}','Bezahlt')">Bezahlt</button>
+        <button onclick="auftragBearbeiten('${a.id}')">Bearbeiten</button>
+        <button onclick="rechnungErstellen('${a.id}')">Rechnung</button>
+        <button onclick="auftragLoeschen('${a.id}')">Löschen</button>
+      </div>
+    `;
+  }).join("");
+}
+
+function rechnungErstellen(id){
+  const a = auftraege.find(x => String(x.id) === String(id));
+  if(!a) return;
+
+  const nr = rechnungsNummer(a);
+  const netto = Number(a.preis||0)+Number(a.materialpreis||0);
+  const mwstSatz = Number(einstellungen.firmaMwst || 0);
+  const mwst = netto * mwstSatz / 100;
+  const brutto = netto + mwst;
+
+  document.getElementById("rechnungInhalt").innerHTML = `
+    <div style="padding:20px">
+      ${einstellungen.logo ? `<img src="${einstellungen.logo}" style="max-width:160px">` : ""}
+      <h1>${einstellungen.firmaName || "Fahrrad Werkstatt"}</h1>
+      <p>${(einstellungen.firmaAdresse || "").replaceAll("\n","<br>")}</p>
+      <p>${einstellungen.firmaTelefon || ""} · ${einstellungen.firmaEmail || ""}</p>
+      <p>${einstellungen.firmaSteuer || ""}</p>
+      <hr>
+
+      <h2>Rechnung ${nr}</h2>
+      <p><b>Datum:</b> ${a.datum}</p>
+      <p><b>Zahlungsstatus:</b> ${a.zahlungsart || "Offen"}</p>
+
+      <h3>Kunde</h3>
+      <p>${a.kunde}<br>${(a.adresse || "").replaceAll("\n","<br>")}<br>${a.email || ""}</p>
+
+      <h3>Fahrrad</h3>
+      <p>${a.fahrrad}<br>Seriennummer: ${a.seriennummer || "-"}</p>
+
+      <table width="100%" border="1" cellspacing="0" cellpadding="6">
+        <tr><th align="left">Position</th><th align="right">Preis</th></tr>
+        ${(a.leistungen || []).map(l=>`
+          <tr><td>${l.name}</td><td align="right">${Number(l.preis||0).toFixed(2)} €</td></tr>
+        `).join("")}
+        <tr><td>${(a.material || "Material").replaceAll("\n","<br>")}</td><td align="right">${Number(a.materialpreis||0).toFixed(2)} €</td></tr>
+      </table>
+
+      <h3>Netto: ${netto.toFixed(2)} €</h3>
+      <p>MwSt. ${mwstSatz}%: ${mwst.toFixed(2)} €</p>
+      <h2>Gesamt: ${brutto.toFixed(2)} €</h2>
+
+      <br><br>_________________________<br>Unterschrift
+    </div>
+  `;
+
+  zeigeTab("rechnung");
+}
+
+function kundenAnzeigen(){
+  const liste = document.getElementById("kundenListe");
+  if(!liste) return;
+
+  const kunden = {};
+  auftraege.forEach(a=>{
+    if(!kunden[a.kunde]) kunden[a.kunde]=[];
+    kunden[a.kunde].push(a);
+  });
+
+  liste.innerHTML = Object.keys(kunden).map(name=>{
+    const summe = kunden[name].reduce((s,a)=>s+Number(a.preis||0)+Number(a.materialpreis||0),0);
+    const fahrraeder = [...new Set(kunden[name].map(a=>a.fahrrad))];
+
+    return `
+      <div class="auftrag">
+        <h3>${name}</h3>
+        Adresse:<br>${(kunden[name][0].adresse || "-").replaceAll("\n","<br>")}<br><br>
+        Fahrräder: ${fahrraeder.join(", ")}<br>
+        Aufträge: ${kunden[name].length}<br>
+        Gesamtumsatz: ${summe.toFixed(2)} €<br>
+        ${kunden[name].map(a=>`
+          <div class="auftrag">
+            ${a.datum} · ${a.fahrrad} · ${a.leistung} · ${a.status}
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }).join("");
+}
+
+function dashboardAnzeigen(){
+  const heute = new Date().toLocaleDateString();
+  const monat = new Date().getMonth();
+  const jahr = new Date().getFullYear();
+
+  const tagesumsatz = auftraege
+    .filter(a => a.datum === heute)
+    .reduce((s,a)=>s+Number(a.preis||0)+Number(a.materialpreis||0),0);
+
+  const monatsumsatz = auftraege.reduce((s,a)=>{
+    const teile = (a.datum || "").split(".");
+    if(teile.length < 3) return s;
+    const d = new Date(teile[2], teile[1]-1, teile[0]);
+    return d.getMonth() === monat && d.getFullYear() === jahr
+      ? s + Number(a.preis||0)+Number(a.materialpreis||0)
+      : s;
+  },0);
+
+  const offene = auftraege.filter(a => !["Bezahlt","Storniert"].includes(a.status)).length;
+  const lagerwarnungen = lager.filter(t=>Number(t.bestand||0)<=Number(t.minimum||0)).length;
+  const offeneBestellungen = bestellungen.filter(b=>b.status !== "Eingebaut").length;
+  const offeneRechnungen = auftraege.filter(a=>a.zahlungsart === "Offen" && a.status !== "Storniert").length;
+
+  document.getElementById("dashboardInhalt").innerHTML = `
+    <p><b>Tagesumsatz:</b> ${tagesumsatz.toFixed(2)} €</p>
+    <p><b>Monatsumsatz:</b> ${monatsumsatz.toFixed(2)} €</p>
+    <p><b>Offene Aufträge:</b> ${offene}</p>
+    <p><b>Offene Rechnungen:</b> ${offeneRechnungen}</p>
+    <p><b>Lagerwarnungen:</b> ${lagerwarnungen}</p>
+    <p><b>Offene Bestellungen:</b> ${offeneBestellungen}</p>
+  `;
+}
