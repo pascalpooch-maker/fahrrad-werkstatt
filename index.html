@@ -124,6 +124,9 @@
 <label>Kategorie</label>
 <select id="lagerKategorie"></select>
 
+  <label>Lieferant</label>
+<input id="lagerLieferant" placeholder="z.B. Bike-Discount">
+
 <label>Neue Kategorie</label>
 <input id="neueKategorie" placeholder="z.B. E-Bike, Werkzeug, Pflege">
 <button onclick="kategorieSpeichern()">Kategorie hinzufügen</button>
@@ -194,6 +197,12 @@
 <option>Geliefert</option>
 <option>Eingebaut</option>
 </select>
+  
+<label>Fertigstellungstermin</label>
+<input id="fertigTermin" type="date">
+
+<label>Erinnerung</label>
+<input id="erinnerung" placeholder="z.B. Kunde anrufen, Teile prüfen">
 
 <button onclick="bestellungSpeichern()">Bestellung speichern</button>
 <div id="bestellListe"></div>
@@ -262,6 +271,9 @@
 
 <section id="einstellungen" class="tab card">
 <h2>⚙️ Einstellungen</h2>
+
+  <label>Firmenlogo</label>
+<input id="firmaLogo" type="file" accept="image/*">
 
 <label>Firmenname</label>
 <input id="firmaName" placeholder="Fahrrad Werkstatt">
