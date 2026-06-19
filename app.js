@@ -679,13 +679,6 @@ function allesAktualisieren(){
   dashboardAnzeigen();
   einstellungenLaden();
 }
-
 window.onload = function(){
-  try{
-    zeigeTab("dashboard");
-    allesAktualisieren();
-  }catch(e){
-    console.error(e);
-    alert("Fehler: " + e.message);
-  }
+  zeigeTab("dashboard");
 };
