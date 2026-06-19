@@ -51,20 +51,22 @@ function speichernDaten(){
   localStorage.setItem("einstellungen", JSON.stringify(einstellungen));
 }
 
+function wert(id){
+  return document.getElementById(id)?.value || "";
+}
+
 function zeigeTab(id){
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
   const el = document.getElementById(id);
   if(el) el.classList.add("active");
 }
 
-function wert(id){ return document.getElementById(id)?.value || ""; }
-
 async function dateiLesen(input){
   const datei = input?.files?.[0];
   if(!datei) return null;
   return await new Promise(resolve=>{
     const r = new FileReader();
-    r.onload = e => resolve({name:datei.name,daten:e.target.result});
+    r.onload = e => resolve({ name:datei.name, daten:e.target.result });
     r.readAsDataURL(datei);
   });
 }
@@ -97,7 +99,7 @@ function leistungsCheckboxenAktualisieren(){
 function leistungenAuslesen(){
   return Array.from(document.querySelectorAll(".leistungCheck:checked")).map(c=>{
     const [name,preis] = c.value.split("|");
-    return {name, preis:Number(preis || 0)};
+    return { name, preis:Number(preis || 0) };
   });
 }
 
@@ -252,7 +254,6 @@ function auftraegeAnzeigen(){
         <p><b>Erinnerung:</b> ${a.erinnerung || "-"}</p>
         <p><b>Gesamt:</b> ${gesamt.toFixed(2)} €</p>
         <div>${(a.bilder||[]).map(b=>`<img src="${b}">`).join("")}</div>
-
         <button onclick="auftragStatus('${a.id}','In Arbeit')">In Arbeit</button>
         <button onclick="auftragStatus('${a.id}','Fertig')">Fertig</button>
         <button onclick="auftragStatus('${a.id}','Abgeholt')">Abgeholt</button>
@@ -359,7 +360,6 @@ function lagerBearbeiten(id){
   document.getElementById("lagerMinimum").value = t.minimum || 0;
   document.getElementById("lagerEk").value = t.ek || 0;
   document.getElementById("lagerAufschlag").value = t.aufschlag || 0;
-
   zeigeTab("lager");
 }
 
@@ -382,7 +382,6 @@ function lagerBestandAendern(id,wert){
 function lagerAnzeigen(){
   const liste = document.getElementById("lagerListe");
   if(!liste) return;
-
   liste.innerHTML = lager.map(t=>{
     const warnung = Number(t.bestand||0) <= Number(t.minimum||0);
     return `
@@ -401,7 +400,6 @@ function lagerAnzeigen(){
       </div>
     `;
   }).join("");
-
   lagerSelectAktualisieren();
 }
 
@@ -433,4 +431,371 @@ async function wareneingangArtikelSpeichern(){
   const name = wert("weArtikel");
   const menge = Number(wert("weMenge") || 1);
   const ek = Number(wert("weEk") || 0);
-  const aufschlag
+  const aufschlag = Number(wert("weAufschlag") || 0);
+  const vk = ek + (ek * aufschlag / 100);
+  const pdf = await dateiLesen(document.getElementById("wePdf"));
+
+  if(!name){ alert("Bitte Artikel eintragen."); return; }
+
+  const teil = lager.find(t => t.name && t.name.toLowerCase() === name.toLowerCase());
+  if(teil){
+    teil.bestand = Number(teil.bestand||0) + menge;
+    teil.ek = ek;
+    teil.vk = vk;
+    teil.aufschlag = aufschlag;
+  } else {
+    lager.push({id:Date.now(), name, kategorie:"Wareneingang", bestand:menge, minimum:0, ek, vk, aufschlag});
+  }
+
+  wareneingaenge.push({
+    id:Date.now()+Math.random(),
+    lieferant:wert("weLieferant"),
+    nummer:wert("weNummer"),
+    artikel:name,
+    menge,
+    ek,
+    vk,
+    pdfName: pdf ? pdf.name : "",
+    pdf: pdf ? pdf.daten : "",
+    datum:new Date().toLocaleDateString()
+  });
+
+  speichernDaten();
+  allesAktualisieren();
+
+  document.getElementById("weArtikel").value="";
+  document.getElementById("weMenge").value=1;
+  document.getElementById("weEk").value="";
+}
+
+function wareneingangAnzeigen(){
+  const liste = document.getElementById("wareneingangListe");
+  if(!liste) return;
+  liste.innerHTML = wareneingaenge.map(w=>`
+    <div class="auftrag">
+      <b>${w.artikel}</b><br>
+      Lieferant: ${w.lieferant || "-"}<br>
+      Rechnung: ${w.nummer || "-"}<br>
+      Menge: ${w.menge}<br>
+      EK: ${Number(w.ek||0).toFixed(2)} € · VK: ${Number(w.vk||0).toFixed(2)} €<br>
+      ${w.pdf ? `<button onclick="pdfOeffnen('${w.id}','wareneingang')">PDF öffnen</button>` : ""}
+    </div>
+  `).join("");
+}
+
+function bestellungSpeichern(){
+  bestellungen.push({
+    id:Date.now(),
+    kunde:wert("bestellKunde"),
+    auftrag:wert("bestellAuftrag"),
+    teil:wert("bestellTeil"),
+    status:wert("bestellStatus")
+  });
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function bestellStatusAendern(id,status){
+  const b = bestellungen.find(x => String(x.id) === String(id));
+  if(!b) return;
+  b.status = status;
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function bestellungenAnzeigen(){
+  const liste = document.getElementById("bestellListe");
+  if(!liste) return;
+  liste.innerHTML = bestellungen.map(b=>`
+    <div class="auftrag">
+      <b>${b.kunde}</b><br>
+      Auftrag: ${b.auftrag || "-"}<br>
+      Teil: ${b.teil}<br>
+      Status: ${b.status}<br>
+      <button onclick="bestellStatusAendern('${b.id}','Bestellt')">Bestellt</button>
+      <button onclick="bestellStatusAendern('${b.id}','Geliefert')">Geliefert</button>
+      <button onclick="bestellStatusAendern('${b.id}','Eingebaut')">Eingebaut</button>
+    </div>
+  `).join("");
+}
+
+function terminSpeichern(){
+  termine.push({
+    id:Date.now(),
+    datum:wert("terminDatum"),
+    zeit:wert("terminZeit"),
+    text:wert("terminText")
+  });
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function terminLoeschen(id){
+  if(!confirm("Termin löschen?")) return;
+  termine = termine.filter(t => String(t.id) !== String(id));
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function termineAnzeigen(){
+  const liste = document.getElementById("terminListe");
+  if(!liste) return;
+  liste.innerHTML = termine.map(t=>`
+    <div class="auftrag">
+      <b>${t.datum} ${t.zeit}</b><br>
+      ${t.text}<br>
+      <button onclick="terminLoeschen('${t.id}')">Löschen</button>
+    </div>
+  `).join("");
+}
+
+async function belegSpeichern(){
+  const pdf = await dateiLesen(document.getElementById("belegDatei"));
+  belege.push({
+    id:Date.now(),
+    auftragId:wert("belegAuftrag"),
+    lieferant:wert("belegLieferant"),
+    nummer:wert("belegNummer"),
+    betrag:Number(wert("belegBetrag") || 0),
+    pdfName: pdf ? pdf.name : "",
+    pdf: pdf ? pdf.daten : ""
+  });
+  speichernDaten();
+  allesAktualisieren();
+}
+
+function belegAuftraegeFuellen(){
+  const s = document.getElementById("belegAuftrag");
+  if(!s) return;
+  s.innerHTML = `<option value="">Kein Auftrag</option>` + auftraege.map(a=>`
+    <option value="${a.id}">${a.kunde} - ${a.fahrrad}</option>
+  `).join("");
+}
+
+function belegeAnzeigen(){
+  const liste = document.getElementById("belegListe");
+  if(!liste) return;
+  liste.innerHTML = belege.map(b=>`
+    <div class="auftrag">
+      <b>${b.lieferant || "-"}</b><br>
+      Rechnung: ${b.nummer || "-"}<br>
+      Betrag: ${Number(b.betrag||0).toFixed(2)} €<br>
+      ${b.pdf ? `<button onclick="pdfOeffnen('${b.id}','beleg')">PDF öffnen</button>` : ""}
+    </div>
+  `).join("");
+}
+
+function pdfOeffnen(id, quelle){
+  const e = quelle === "wareneingang"
+    ? wareneingaenge.find(x => String(x.id) === String(id))
+    : belege.find(x => String(x.id) === String(id));
+  if(!e || !e.pdf) return;
+  const win = window.open();
+  win.document.write(`<iframe src="${e.pdf}" style="width:100%;height:100vh;border:0"></iframe>`);
+}
+
+function kundenAnzeigen(){
+  const liste = document.getElementById("kundenListe");
+  if(!liste) return;
+
+  const kunden = {};
+  auftraege.forEach(a=>{
+    if(!kunden[a.kunde]) kunden[a.kunde]=[];
+    kunden[a.kunde].push(a);
+  });
+
+  liste.innerHTML = Object.keys(kunden).map(name=>{
+    const summe = kunden[name].reduce((s,a)=>s+Number(a.preis||0)+Number(a.materialpreis||0),0);
+    const fahrraeder = [...new Set(kunden[name].map(a=>a.fahrrad))];
+
+    return `
+      <div class="auftrag">
+        <h3>${name}</h3>
+        Adresse:<br>${(kunden[name][0].adresse || "-").replaceAll("\n","<br>")}<br><br>
+        Fahrräder: ${fahrraeder.join(", ")}<br>
+        Aufträge: ${kunden[name].length}<br>
+        Gesamtumsatz: ${summe.toFixed(2)} €<br>
+        ${kunden[name].map(a=>`
+          <div class="auftrag">
+            ${a.datum} · ${a.fahrrad} · ${a.leistung} · ${a.status}
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }).join("");
+}
+
+async function logoLesen(){
+  const input = document.getElementById("firmaLogo");
+  if(!input || !input.files[0]) return einstellungen.logo || "";
+  const datei = input.files[0];
+  return await new Promise(resolve=>{
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.readAsDataURL(datei);
+  });
+}
+
+async function einstellungenSpeichern(){
+  einstellungen = {
+    firmaName:wert("firmaName"),
+    firmaAdresse:wert("firmaAdresse"),
+    firmaTelefon:wert("firmaTelefon"),
+    firmaEmail:wert("firmaEmail"),
+    firmaSteuer:wert("firmaSteuer"),
+    firmaMwst:Number(wert("firmaMwst") || 0),
+    firmaStundensatz:Number(wert("firmaStundensatz") || 45),
+    logo: await logoLesen()
+  };
+  speichernDaten();
+  alert("Einstellungen gespeichert.");
+}
+
+function einstellungenLaden(){
+  Object.keys(einstellungen).forEach(k=>{
+    const el = document.getElementById(k);
+    if(el && k !== "logo") el.value = einstellungen[k];
+  });
+}
+
+function rechnungsNummer(a){
+  if(!a.rechnungsnummer){
+    const jahr = new Date().getFullYear();
+    const nr = Number(localStorage.getItem("rechnungNr") || 1);
+    a.rechnungsnummer = `${jahr}-${String(nr).padStart(4,"0")}`;
+    localStorage.setItem("rechnungNr", nr + 1);
+    speichernDaten();
+  }
+  return a.rechnungsnummer;
+}
+
+function rechnungErstellen(id){
+  const a = auftraege.find(x => String(x.id) === String(id));
+  if(!a) return;
+
+  const nr = rechnungsNummer(a);
+  const netto = Number(a.preis||0)+Number(a.materialpreis||0);
+  const mwstSatz = Number(einstellungen.firmaMwst || 0);
+  const mwst = netto * mwstSatz / 100;
+  const brutto = netto + mwst;
+
+  document.getElementById("rechnungInhalt").innerHTML = `
+    <div style="padding:20px">
+      ${einstellungen.logo ? `<img src="${einstellungen.logo}" style="max-width:160px">` : ""}
+      <h1>${einstellungen.firmaName || "Fahrrad Werkstatt"}</h1>
+      <p>${(einstellungen.firmaAdresse || "").replaceAll("\n","<br>")}</p>
+      <p>${einstellungen.firmaTelefon || ""} · ${einstellungen.firmaEmail || ""}</p>
+      <p>${einstellungen.firmaSteuer || ""}</p>
+      <hr>
+
+      <h2>Rechnung ${nr}</h2>
+      <p><b>Datum:</b> ${a.datum}</p>
+      <p><b>Zahlungsstatus:</b> ${a.zahlungsart || "Offen"}</p>
+
+      <h3>Kunde</h3>
+      <p>${a.kunde}<br>${(a.adresse || "").replaceAll("\n","<br>")}<br>${a.email || ""}</p>
+
+      <h3>Fahrrad</h3>
+      <p>${a.fahrrad}<br>Seriennummer: ${a.seriennummer || "-"}</p>
+
+      <table width="100%" border="1" cellspacing="0" cellpadding="6">
+        <tr><th align="left">Position</th><th align="right">Preis</th></tr>
+        ${(a.leistungen || []).map(l=>`
+          <tr><td>${l.name}</td><td align="right">${Number(l.preis||0).toFixed(2)} €</td></tr>
+        `).join("")}
+        <tr><td>${(a.material || "Material").replaceAll("\n","<br>")}</td><td align="right">${Number(a.materialpreis||0).toFixed(2)} €</td></tr>
+      </table>
+
+      <h3>Netto: ${netto.toFixed(2)} €</h3>
+      <p>MwSt. ${mwstSatz}%: ${mwst.toFixed(2)} €</p>
+      <h2>Gesamt: ${brutto.toFixed(2)} €</h2>
+      <br><br>_________________________<br>Unterschrift
+    </div>
+  `;
+
+  zeigeTab("rechnung");
+}
+
+function dashboardAnzeigen(){
+  const heute = new Date().toLocaleDateString();
+  const monat = new Date().getMonth();
+  const jahr = new Date().getFullYear();
+
+  const tagesumsatz = auftraege
+    .filter(a => a.datum === heute)
+    .reduce((s,a)=>s+Number(a.preis||0)+Number(a.materialpreis||0),0);
+
+  const monatsumsatz = auftraege.reduce((s,a)=>{
+    const teile = (a.datum || "").split(".");
+    if(teile.length < 3) return s;
+    const d = new Date(teile[2], teile[1]-1, teile[0]);
+    return d.getMonth() === monat && d.getFullYear() === jahr
+      ? s + Number(a.preis||0)+Number(a.materialpreis||0)
+      : s;
+  },0);
+
+  const offene = auftraege.filter(a => !["Bezahlt","Storniert"].includes(a.status)).length;
+  const lagerwarnungen = lager.filter(t=>Number(t.bestand||0)<=Number(t.minimum||0)).length;
+  const offeneBestellungen = bestellungen.filter(b=>b.status !== "Eingebaut").length;
+  const offeneRechnungen = auftraege.filter(a=>a.zahlungsart === "Offen" && a.status !== "Storniert").length;
+
+  document.getElementById("dashboardInhalt").innerHTML = `
+    <p><b>Tagesumsatz:</b> ${tagesumsatz.toFixed(2)} €</p>
+    <p><b>Monatsumsatz:</b> ${monatsumsatz.toFixed(2)} €</p>
+    <p><b>Offene Aufträge:</b> ${offene}</p>
+    <p><b>Offene Rechnungen:</b> ${offeneRechnungen}</p>
+    <p><b>Lagerwarnungen:</b> ${lagerwarnungen}</p>
+    <p><b>Offene Bestellungen:</b> ${offeneBestellungen}</p>
+  `;
+}
+
+function backupExport(){
+  document.getElementById("backupText").value = JSON.stringify({
+    auftraege,lager,bestellungen,termine,belege,wareneingaenge,eigeneLeistungen,lagerKategorien,einstellungen
+  });
+}
+
+function backupImport(){
+  try{
+    const d = JSON.parse(document.getElementById("backupText").value);
+    auftraege=d.auftraege||[];
+    lager=d.lager||[];
+    bestellungen=d.bestellungen||[];
+    termine=d.termine||[];
+    belege=d.belege||[];
+    wareneingaenge=d.wareneingaenge||[];
+    eigeneLeistungen=d.eigeneLeistungen||eigeneLeistungen;
+    lagerKategorien=d.lagerKategorien||lagerKategorien;
+    einstellungen=d.einstellungen||einstellungen;
+    speichernDaten();
+    allesAktualisieren();
+    alert("Backup importiert.");
+  }catch{
+    alert("Fehler beim Backup-Import.");
+  }
+}
+
+function sicher(fn){
+  try { fn(); } catch(e){ console.log("Fehler:", e.message); }
+}
+
+function allesAktualisieren(){
+  sicher(leistungsCheckboxenAktualisieren);
+  sicher(leistungenAnzeigen);
+  sicher(kategorienAnzeigen);
+  sicher(lagerAnzeigen);
+  sicher(auftraegeAnzeigen);
+  sicher(kundenAnzeigen);
+  sicher(wareneingangAnzeigen);
+  sicher(bestellungenAnzeigen);
+  sicher(termineAnzeigen);
+  sicher(belegeAnzeigen);
+  sicher(belegAuftraegeFuellen);
+  sicher(dashboardAnzeigen);
+  sicher(einstellungenLaden);
+}
+
+window.onload = function(){
+  zeigeTab("dashboard");
+  allesAktualisieren();
+};
