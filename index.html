@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fahrrad Werkstatt Pro V9.2</title>
+<title>Fahrrad Werkstatt Pro V9.3</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <header>
-<h1>🚲 Fahrrad Werkstatt Pro V9.2</h1>
+<h1>🚲 Fahrrad Werkstatt Pro V9.3</h1>
 <p>Aufträge · Kunden · Lager · Rechnungen · Kalender · Wareneingang</p>
 </header>
 
@@ -83,6 +83,7 @@
 <option>Warten auf Teile</option>
 <option>In Arbeit</option>
 <option>Fertig</option>
+<option>Abgeholt</option>
 <option>Bezahlt</option>
 <option>Storniert</option>
 </select>
@@ -94,6 +95,12 @@
 <option>Überweisung</option>
 <option>Karte</option>
 </select>
+
+<label>Fertigstellungstermin</label>
+<input id="fertigTermin" type="date">
+
+<label>Erinnerung</label>
+<input id="erinnerung" placeholder="z.B. Kunde anrufen, Teile prüfen">
 
 <label>Bilder</label>
 <input id="bilder" type="file" accept="image/*" multiple>
@@ -124,7 +131,7 @@
 <label>Kategorie</label>
 <select id="lagerKategorie"></select>
 
-  <label>Lieferant</label>
+<label>Lieferant</label>
 <input id="lagerLieferant" placeholder="z.B. Bike-Discount">
 
 <label>Neue Kategorie</label>
@@ -197,12 +204,6 @@
 <option>Geliefert</option>
 <option>Eingebaut</option>
 </select>
-  
-<label>Fertigstellungstermin</label>
-<input id="fertigTermin" type="date">
-
-<label>Erinnerung</label>
-<input id="erinnerung" placeholder="z.B. Kunde anrufen, Teile prüfen">
 
 <button onclick="bestellungSpeichern()">Bestellung speichern</button>
 <div id="bestellListe"></div>
@@ -272,7 +273,7 @@
 <section id="einstellungen" class="tab card">
 <h2>⚙️ Einstellungen</h2>
 
-  <label>Firmenlogo</label>
+<label>Firmenlogo</label>
 <input id="firmaLogo" type="file" accept="image/*">
 
 <label>Firmenname</label>
@@ -310,6 +311,5 @@
 </div>
 
 <script src="app.js"></script>
-
 </body>
 </html>
