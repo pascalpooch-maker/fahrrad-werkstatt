@@ -664,21 +664,26 @@ function backupImport(){
   }
 }
 
-function allesAktualisieren(){
-  leistungsCheckboxenAktualisieren();
-  leistungenAnzeigen();
-  kategorienAnzeigen();
-  lagerAnzeigen();
-  auftraegeAnzeigen();
-  kundenAnzeigen();
-  wareneingangAnzeigen();
-  bestellungenAnzeigen();
-  termineAnzeigen();
-  belegeAnzeigen();
-  belegAuftraegeFuellen();
-  dashboardAnzeigen();
-  einstellungenLaden();
+function sicher(fn){
+  try { fn(); } catch(e){ console.log("Fehler:", e.message); }
 }
+
+function allesAktualisieren(){
+  sicher(leistungsCheckboxenAktualisieren);
+  sicher(leistungenAnzeigen);
+  sicher(kategorienAnzeigen);
+  sicher(lagerAnzeigen);
+  sicher(auftraegeAnzeigen);
+  sicher(kundenAnzeigen);
+  sicher(wareneingangAnzeigen);
+  sicher(bestellungenAnzeigen);
+  sicher(termineAnzeigen);
+  sicher(belegeAnzeigen);
+  sicher(belegAuftraegeFuellen);
+  sicher(dashboardAnzeigen);
+  sicher(einstellungenLaden);
+
 window.onload = function(){
   zeigeTab("dashboard");
+  allesAktualisieren();
 };
