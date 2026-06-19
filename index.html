@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fahrrad Werkstatt Pro V9</title>
+<title>Fahrrad Werkstatt Pro V9.2</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <header>
-<h1>🚲 Fahrrad Werkstatt Pro V9</h1>
-<p>Werkstatt · Lager · Kunden · Rechnungen · Bestellungen</p>
+<h1>🚲 Fahrrad Werkstatt Pro V9.2</h1>
+<p>Aufträge · Kunden · Lager · Rechnungen · Kalender · Wareneingang</p>
 </header>
 
 <div class="container">
@@ -26,9 +26,10 @@
 <button onclick="zeigeTab('bestellungen')">Bestellungen</button>
 <button onclick="zeigeTab('kalender')">Kalender</button>
 <button onclick="zeigeTab('belege')">Belege</button>
-<button onclick="zeigeTab('rechnung')">Rechnung</button>
-<button onclick="zeigeTab('backup')">Backup</button>
 <button onclick="zeigeTab('leistungen')">Leistungen</button>
+<button onclick="zeigeTab('rechnung')">Rechnung</button>
+<button onclick="zeigeTab('einstellungen')">Einstellungen</button>
+<button onclick="zeigeTab('backup')">Backup</button>
 </nav>
 
 <section id="dashboard" class="tab card">
@@ -37,7 +38,6 @@
 </section>
 
 <section id="auftrag" class="tab card">
-
 <h2 id="formularTitel">Neuer Auftrag</h2>
 
 <input type="hidden" id="editId">
@@ -51,6 +51,9 @@
 <label>E-Mail</label>
 <input id="email" type="email">
 
+<label>Adresse</label>
+<textarea id="kundenAdresse"></textarea>
+
 <label>Fahrrad</label>
 <input id="fahrrad" type="text">
 
@@ -60,35 +63,13 @@
 <label>Leistungen</label>
 <div id="leistungenContainer"></div>
 
-<div>
-  <label><input type="checkbox" class="leistungCheck" value="Frühjahrs-Check|55"> Frühjahrs-Check – 55 €</label><br>
-  <label><input type="checkbox" class="leistungCheck" value="Reifenwechsel|20"> Reifenwechsel – 20 €</label><br>
-  <label><input type="checkbox" class="leistungCheck" value="Schlauch wechseln|15"> Schlauch wechseln – 15 €</label><br>
-  <label><input type="checkbox" class="leistungCheck" value="Bremsen einstellen|15"> Bremsen einstellen – 15 €</label><br>
-  <label><input type="checkbox" class="leistungCheck" value="Schaltung einstellen|20"> Schaltung einstellen – 20 €</label><br>
-  <label><input type="checkbox" class="leistungCheck" value="Kette wechseln|25"> Kette wechseln – 25 €</label><br>
-  <label><input type="checkbox" class="leistungCheck" value="Große Inspektion|129"> Große Inspektion – 129 €</label><br>
-  <label><input type="checkbox" class="leistungCheck" value="E-Bike Diagnose|35"> E-Bike Diagnose – 35 €</label>
-</div>
-<option value="Frühjahrs-Check|55">Frühjahrs-Check – 55 €</option>
-<option value="Reifenwechsel|20">Reifenwechsel – 20 €</option>
-<option value="Schlauch wechseln|15">Schlauch wechseln – 15 €</option>
-<option value="Bremsen einstellen|15">Bremsen einstellen – 15 €</option>
-<option value="Schaltung einstellen|20">Schaltung einstellen – 20 €</option>
-<option value="Kette wechseln|25">Kette wechseln – 25 €</option>
-<option value="Große Inspektion|129">Große Inspektion – 129 €</option>
-<option value="E-Bike Diagnose|35">E-Bike Diagnose – 35 €</option>
-</select>
-
 <label>Zusatzarbeiten</label>
 <textarea id="notiz"></textarea>
 
 <label>Lagerartikel zum Auftrag hinzufügen</label>
 <select id="auftragLagerArtikel"></select>
 
-<button onclick="lagerArtikelZumAuftrag()">
-Lagerartikel hinzufügen
-</button>
+<button onclick="lagerArtikelZumAuftrag()">Lagerartikel hinzufügen</button>
 
 <label>Material / Teile</label>
 <textarea id="material"></textarea>
@@ -103,6 +84,15 @@ Lagerartikel hinzufügen
 <option>In Arbeit</option>
 <option>Fertig</option>
 <option>Bezahlt</option>
+<option>Storniert</option>
+</select>
+
+<label>Zahlungsart</label>
+<select id="zahlungsart">
+<option>Offen</option>
+<option>Bar</option>
+<option>Überweisung</option>
+<option>Karte</option>
 </select>
 
 <label>Bilder</label>
@@ -110,29 +100,23 @@ Lagerartikel hinzufügen
 
 <button onclick="auftragSpeichern()">Auftrag speichern</button>
 <button onclick="formularLeeren()">Neuer Auftrag</button>
-
 </section>
 
 <section id="liste" class="tab card">
 <h2>📋 Aufträge</h2>
-
-<input id="suche"
-placeholder="Suche nach Kunde, Fahrrad oder Status..."
-oninput="auftraegeAnzeigen()">
-
+<input id="suche" placeholder="Suche nach Kunde, Fahrrad oder Status..." oninput="auftraegeAnzeigen()">
 <div id="auftragsliste"></div>
 </section>
 
 <section id="kunden" class="tab card">
 <h2>👤 Kundenakte</h2>
-
-<p>Alle Kunden mit Auftrags- und Umsatzhistorie.</p>
-
 <div id="kundenListe"></div>
 </section>
 
 <section id="lager" class="tab card">
 <h2>📦 Lager</h2>
+
+<input type="hidden" id="lagerEditId">
 
 <label>Artikel</label>
 <input id="lagerName">
@@ -142,10 +126,7 @@ oninput="auftraegeAnzeigen()">
 
 <label>Neue Kategorie</label>
 <input id="neueKategorie" placeholder="z.B. E-Bike, Werkzeug, Pflege">
-
-<button onclick="kategorieSpeichern()">
-Kategorie hinzufügen
-</button>
+<button onclick="kategorieSpeichern()">Kategorie hinzufügen</button>
 
 <label>Bestand</label>
 <input id="lagerBestand" type="number">
@@ -159,15 +140,11 @@ Kategorie hinzufügen
 <label>Aufschlag %</label>
 <input id="lagerAufschlag" type="number" value="50">
 
-<button onclick="lagerSpeichern()">
-Artikel speichern
-</button>
-
+<button onclick="lagerSpeichern()">Artikel speichern</button>
 <div id="lagerListe"></div>
 </section>
 
 <section id="wareneingang" class="tab card">
-
 <h2>📦 Wareneingang</h2>
 
 <label>Lieferant</label>
@@ -193,12 +170,8 @@ Artikel speichern
 <label>Aufschlag %</label>
 <input id="weAufschlag" type="number" value="50">
 
-<button onclick="wareneingangArtikelSpeichern()">
-Ins Lager buchen
-</button>
-
+<button onclick="wareneingangArtikelSpeichern()">Ins Lager buchen</button>
 <div id="wareneingangListe"></div>
-
 </section>
 
 <section id="bestellungen" class="tab card">
@@ -217,14 +190,12 @@ Ins Lager buchen
 <select id="bestellStatus">
 <option>Offen</option>
 <option>Bestellt</option>
+<option>Unterwegs</option>
 <option>Geliefert</option>
 <option>Eingebaut</option>
 </select>
 
-<button onclick="bestellungSpeichern()">
-Bestellung speichern
-</button>
-
+<button onclick="bestellungSpeichern()">Bestellung speichern</button>
 <div id="bestellListe"></div>
 </section>
 
@@ -240,10 +211,7 @@ Bestellung speichern
 <label>Kunde / Aufgabe</label>
 <input id="terminText">
 
-<button onclick="terminSpeichern()">
-Termin speichern
-</button>
-
+<button onclick="terminSpeichern()">Termin speichern</button>
 <div id="terminListe"></div>
 </section>
 
@@ -265,39 +233,8 @@ Termin speichern
 <label>PDF auswählen</label>
 <input id="belegDatei" type="file" accept="application/pdf">
 
-<button onclick="belegSpeichern()">
-PDF-Beleg speichern
-</button>
-
+<button onclick="belegSpeichern()">PDF-Beleg speichern</button>
 <div id="belegListe"></div>
-</section>
-
-<section id="rechnung" class="tab card">
-
-<h2>🧾 Rechnung</h2>
-
-<div id="rechnungInhalt"></div>
-
-<button onclick="zeigeTab('liste')">
-Zurück
-</button>
-
-<button onclick="window.print()">
-PDF erstellen
-</button>
-
-</section>
-<h2>🧾 Rechnung</h2>
-
-<div id="rechnungInhalt"></div>
-
-<button onclick="zeigeTab('liste')">
-Zurück
-</button>
-
-<button onclick="window.print()">
-Drucken / PDF speichern
-</button>
 </section>
 
 <section id="leistungen" class="tab card">
@@ -313,23 +250,49 @@ Drucken / PDF speichern
 <input id="leistungStundensatz" type="number" step="0.01" value="45">
 
 <button onclick="leistungSpeichern()">Leistung speichern</button>
-
 <div id="leistungenListe"></div>
 </section>
-  
+
+<section id="rechnung" class="tab card">
+<h2>🧾 Rechnung</h2>
+<div id="rechnungInhalt"></div>
+<button onclick="zeigeTab('liste')">Zurück</button>
+<button onclick="window.print()">PDF erstellen / Drucken</button>
+</section>
+
+<section id="einstellungen" class="tab card">
+<h2>⚙️ Einstellungen</h2>
+
+<label>Firmenname</label>
+<input id="firmaName" placeholder="Fahrrad Werkstatt">
+
+<label>Adresse</label>
+<textarea id="firmaAdresse"></textarea>
+
+<label>Telefon</label>
+<input id="firmaTelefon">
+
+<label>E-Mail</label>
+<input id="firmaEmail">
+
+<label>Steuernummer / UID</label>
+<input id="firmaSteuer">
+
+<label>MwSt. %</label>
+<input id="firmaMwst" type="number" value="20">
+
+<label>Standard-Stundensatz €</label>
+<input id="firmaStundensatz" type="number" value="45">
+
+<button onclick="einstellungenSpeichern()">Einstellungen speichern</button>
+</section>
+
 <section id="backup" class="tab card">
 <h2>💾 Backup</h2>
 
-<button onclick="backupExport()">
-Backup exportieren
-</button>
-
-<textarea id="backupText"
-placeholder="Backup hier einfügen"></textarea>
-
-<button onclick="backupImport()">
-Backup importieren
-</button>
+<button onclick="backupExport()">Backup exportieren</button>
+<textarea id="backupText" placeholder="Backup hier einfügen"></textarea>
+<button onclick="backupImport()">Backup importieren</button>
 </section>
 
 </div>
